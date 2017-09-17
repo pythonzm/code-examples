@@ -16,7 +16,7 @@ This is a collection of examples of php
 * [Classes-and-Objects](https://github.com/cyub/code-examples/tree/master/php/Classes-and-Objects)
     * [抽象类](https://github.com/cyub/code-examples/tree/master/php/Classes-and-Objects/class_abstraction.php)
     
-    子类定义了一个可选参数，而父类抽象方法的声明里没有，是可以的
+        子类定义了一个可选参数，而父类抽象方法的声明里没有，是可以的
 
     * [访问控制](https://github.com/cyub/code-examples/tree/master/php/Classes-and-Objects/object_access_control.php)
      
@@ -24,7 +24,7 @@ This is a collection of examples of php
 
     * [对象生命周期](https://github.com/cyub/code-examples/tree/master/php/Classes-and-Objects/object_lifecycle.php)
     
-    TTL: \__construct < exit < regsiter_shutdown < \__destruct
+        TTL: \__construct < exit < regsiter_shutdown < \__destruct
 
     * [范围解析操作符](https://github.com/cyub/code-examples/tree/master/php/Classes-and-Objects/scope_resolution_operator.php)
     * [引用](https://github.com/cyub/code-examples/tree/master/php/Classes-and-Objects/object_reference.php)
@@ -36,6 +36,6 @@ This is a collection of examples of php
     
     * [trait](https://github.com/cyub/code-examples/tree/master/php/Classes-and-Objects/trait.php)
     
-    优先级顺序是：当前类的成员方法 > trait方法 > 继承的方法
+        优先级顺序是：当前类的成员方法 > trait方法 > 继承的方法
 
 
