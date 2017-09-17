@@ -28,4 +28,13 @@ This is a collection of examples of php
 
     * [范围解析操作符](https://github.com/cyub/code-examples/tree/master/php/Classes-and-Objects/scope_resolution_operator.php)
     * [引用](https://github.com/cyub/code-examples/tree/master/php/Classes-and-Objects/object_reference.php)
+    * [接口](https://github.com/cyub/code-examples/tree/master/php/Classes-and-Objects/interface.php)
+        * 实现多个接口时，接口中的方法不能有重名
+        * 接口通过使用extends操作符实现继承
+        * 类要实现接口，必须使用和接口中所定义的方法完全一致的方式。否则会导致致命错误
+        * 接口中也可以定义常量。接口常量和类常量的使用完全相同，但是不能被子类或子接口所覆盖
+    * [trait](https://github.com/cyub/code-examples/tree/master/php/Classes-and-Objects/trait.php)
+    
+    优先级顺序是：当前类的成员方法 > trait方法 > 继承的方法
+
 
