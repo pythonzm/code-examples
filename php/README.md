@@ -20,7 +20,7 @@ This is a collection of examples of php
 
     * [访问控制](https://github.com/cyub/code-examples/tree/master/php/Classes-and-Objects/object_access_control.php)
      
-     在同一类的不同实例的方法里面，另一个对象所有属性和方法都是可见的
+        在同一类的不同实例的方法里面，另一个对象所有属性和方法都是可见的
 
     * [对象生命周期](https://github.com/cyub/code-examples/tree/master/php/Classes-and-Objects/object_lifecycle.php)
     
