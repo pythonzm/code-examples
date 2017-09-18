@@ -1,0 +1,176 @@
+#!/usr/bin/env bash
+#
+#                  Caddy Installer Script
+#
+#   Homepage: https://caddyserver.com
+#   Issues:   https://github.com/caddyserver/getcaddy.com/issues
+#   Requires: bash, mv, rm, type, curl/wget, tar (or unzip on OSX and Windows)
+#
+# Hello! This is an experimental script that installs Caddy
+# into your PATH (which may require password authorization).
+# Use it like this:
+#
+#	$ curl https://getcaddy.com | bash
+#	 or
+#	$ wget -qO- https://getcaddy.com | bash
+#
+# In automated environments, you may want to run as root.
+# If using curl, we recommend using the -fsSL flags.
+#
+# If you want to get Caddy with extra features, use -s with a
+# comma-separated list of directives, like this:
+#
+#	$ curl https://getcaddy.com | bash -s git,mailout
+#
+# This should work on Mac, Linux, and BSD systems, and
+# hopefully Windows with Cygwin. Please open an issue if
+# you notice any bugs.
+#
+
+install_caddy()
+{
+	trap 'echo -e "Aborted, error $? in command: $BASH_COMMAND"; trap ERR; return 1' ERR
+	caddy_os="unsupported"
+	caddy_arch="unknown"
+	caddy_arm=""
+	caddy_features="$1"
+	install_path="/usr/local/bin"
+
+	# Termux on Android has $PREFIX set which already ends with /usr
+	if [[ -n "$ANDROID_ROOT" && -n "$PREFIX" ]]; then
+		install_path="$PREFIX/bin"
+	fi
+
+	# Fall back to /usr/bin if necessary
+	if [[ ! -d $install_path ]]; then
+		install_path="/usr/bin"
+	fi
+
+	# Not every platform has or needs sudo (see issue #40)
+	((EUID)) && [[ -z "$ANDROID_ROOT" ]] && sudo_cmd="sudo"
+
+	#########################
+	# Which OS and version? #
+	#########################
+
+	caddy_bin="caddy"
+	caddy_dl_ext=".tar.gz"
+
+	# NOTE: `uname -m` is more accurate and universal than `arch`
+	# See https://en.wikipedia.org/wiki/Uname
+	unamem="$(uname -m)"
+	if [[ $unamem == *aarch64* ]]; then
+		caddy_arch="arm64"
+	elif [[ $unamem == *64* ]]; then
+		caddy_arch="amd64"
+	elif [[ $unamem == *86* ]]; then
+		caddy_arch="386"
+	elif [[ $unamem == *armv5* ]]; then
+		caddy_arch="arm"
+		caddy_arm="5"
+	elif [[ $unamem == *armv6l* ]]; then
+		caddy_arch="arm"
+		caddy_arm="6"
+	elif [[ $unamem == *armv7l* ]]; then
+		caddy_arch="arm"
+		caddy_arm="7"
+	else
+		echo "Aborted, unsupported or unknown architecture: $unamem"
+		return 2
+	fi
+
+	uname="$(uname)"
+	declare -u unameu=$uname
+	if [[ ${unameu} == *DARWIN* ]]; then
+		caddy_os="darwin"
+		caddy_dl_ext=".zip"
+		vers=$(sw_vers)
+		version=${vers##*ProductVersion: }
+		IFS='.' read OSX_MAJOR OSX_MINOR _ <<<"$version"
+
+		# Major
+		if ((OSX_MAJOR < 10)); then
+			echo "Aborted, unsupported OS X version (9-)"
+			return 3
+		fi
+		if ((OSX_MAJOR > 10)); then
+			echo "Aborted, unsupported OS X version (11+)"
+			return 4
+		fi
+
+		# Minor
+		if ((OSX_MINOR < 5)); then
+			echo "Aborted, unsupported OS X version (10.5-)"
+			return 5
+		fi
+	elif [[ ${unameu} == *LINUX* ]]; then
+		caddy_os="linux"
+	elif [[ ${unameu} == *FREEBSD* ]]; then
+		caddy_os="freebsd"
+	elif [[ ${unameu} == *OPENBSD* ]]; then
+		caddy_os="openbsd"
+	elif [[ ${unameu} == *WIN* ]]; then
+		# Should catch cygwin
+		caddy_os="windows"
+		caddy_dl_ext=".zip"
+		caddy_bin=$caddy_bin.exe
+	else
+		echo "Aborted, unsupported or unknown os: $uname"
+		return 6
+	fi
+
+	########################
+	# Download and extract #
+	########################
+
+	echo "Downloading Caddy for $caddy_os/$caddy_arch..."
+	caddy_file="caddy_${caddy_os}_$caddy_arch${caddy_arm}_custom$caddy_dl_ext"
+	caddy_url="https://caddyserver.com/download/build?os=$caddy_os&arch=$caddy_arch&arm=$caddy_arm&features=$caddy_features"
+	echo "$caddy_url"
+
+	# Use $PREFIX for compatibility with Termux on Android
+	rm -rf "$PREFIX/tmp/$caddy_file"
+
+	if type -p curl >/dev/null 2>&1; then
+		curl -fsSL "$caddy_url" -o "$PREFIX/tmp/$caddy_file"
+	elif type -p wget >/dev/null 2>&1; then
+		wget --quiet "$caddy_url" -O "$PREFIX/tmp/$caddy_file"
+	else
+		echo "Aborted, could not find curl or wget"
+		return 7
+	fi
+
+	echo "Extracting..."
+	case "$caddy_file" in
+		*.zip)    unzip -o "$PREFIX/tmp/$caddy_file" "$caddy_bin" -d "$PREFIX/tmp/" ;;
+		*.tar.gz) tar -xzf "$PREFIX/tmp/$caddy_file" -C "$PREFIX/tmp/" "$caddy_bin" ;;
+	esac
+	chmod +x "$PREFIX/tmp/$caddy_bin"
+
+	# Back up existing caddy, if any
+	caddy_cur_ver="$("$caddy_bin" --version 2>/dev/null | cut -d ' ' -f2)"
+	if [[ $caddy_cur_ver ]]; then
+		# caddy of some version is already installed
+		caddy_path="$(type -p "$caddy_bin")"
+		caddy_backup="${caddy_path}_$caddy_cur_ver"
+		echo "Backing up $caddy_path to $caddy_backup"
+		echo "(Password may be required.)"
+		$sudo_cmd mv "$caddy_path" "$caddy_backup"
+	fi
+
+	echo "Putting caddy in $install_path (may require password)"
+	$sudo_cmd mv "$PREFIX/tmp/$caddy_bin" "$install_path/$caddy_bin"
+	if setcap_cmd=$(type -p setcap); then
+		$sudo_cmd $setcap_cmd cap_net_bind_service=+ep "$install_path/$caddy_bin"
+	fi
+	$sudo_cmd rm -- "$PREFIX/tmp/$caddy_file"
+
+	# check installation
+	$caddy_bin --version
+
+	echo "Successfully installed"
+	trap ERR
+	return 0
+}
+
+install_caddy "$@"
