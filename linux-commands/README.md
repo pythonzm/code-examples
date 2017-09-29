@@ -402,7 +402,11 @@ echo "lowercase letters" | tr [:lower:] [:upper:] // 小写转大写
 echo "front" | sed 's/front/back/' // 输出back
 sed -n '5,10p' /etc/passwd  // 查看文件5到10行
 ```
-### awk
+### awk - 文本分析工具
+```
+awk '{print $2,$5;}' a.txt // 打印指定的2，5字段
+ps aux | grep mysql | grep -v grep |awk '{print $2}' |xargs kill -9 // 杀掉mysql进程 
+```
 ### head - 显示开头文字行
 ```
 head -n 5 a.txt // 显示头5行文字
@@ -497,6 +501,20 @@ uname -a // 查看系统信息
 ### free
 
 ### df
+
+### date
+
+### shutdown - 系统关机
+```
+shutdown -h now // 系统立即关机
+shutdown -h +10 // 10分钟后关机
+shutdown -r now // 重启
+```
+
+### watch - 定时监控命令
+```
+watch -n 10 'cat /proc/loadavg' // 每隔10s输出系统平均负载
+```
 
 
 ## 10. 相关资源
