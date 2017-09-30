@@ -1,10 +1,10 @@
 ## Shell编程基础
 
-### 1. 变量与参数
+## 1. 变量与参数
 
 **变量赋值**
 
-使用variable=value的命令格式设置变量，其中variable是变量名称，value是打算赋给该变量的值。使用 `\$variable`获取变量值
+使用variable=value的命令格式设置变量，其中variable是变量名称，value是打算赋给该变量的值。使用 `$variable`获取变量值
 
 ```
 PI=3.1415
