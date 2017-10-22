@@ -44,6 +44,23 @@ rm -rf dir1/ dir2/ // 递归删除dir1,dir2目录，即使目录dir2不存在也
 ln -s source_link target_link // 创建软连接target_link
 ```
 
+### stat - 显示文件的详细信息
+
+stat查看文件时候，会显示三种类型时间：分别是Access time，Modify time，Change time。
+
+1. access time：表示我们最后一次访问（仅仅是访问，没有改动）文件的时间。比如more,less,cat,tail等命令都会更改atime
+2. modify time：表示我们最后一次修改文件的时间。touch会更改这三种类型时间
+3. change time：表示我们最后一次对文件属性改变的时间，包括权限，大小，属性等等。chmod,chown会更改此时间。
+
+```
+stat a.txt // 显示文件袋的mtime,atime,ctime
+ls -l a.txt // 列出文件的mtime
+ls -lc a.txt // 列出文件的ctime
+ls -lu a.txt // 列出文件的atime
+```
+
+
+
 
 ## 2. I/O重定向
 标准输入，输出和错误，在shell内部它们为文件描述符0，1和2
@@ -53,6 +70,7 @@ ls -l /usr/bintmp 2>ls-error.txt // 重定向标准错误输出到ls-error.txt
 ls -l /bin/usr > ls-output.txt 2>&1 // 重定向标准输出和错误到同一个文件
 ls -l /usr /usr/bintmp 2>ls-error.txt 1>ls-output.txt // 错误重定向到ls-error.txt 输出重定向到ls-output.txt
 ls /usr/bin | tee ls.txt | grep zip //tee 从stdin读取数据，并同时输出到stdout和文件。tee命令相当于管道的一个T型接头
+ngxin -c nginx.conf > /dev/null 2>&1 & // 屏蔽标准和错误输出
 ```
 
 ## 3. 包管理
@@ -67,6 +85,12 @@ ls /usr/bin | tee ls.txt | grep zip //tee 从stdin读取数据，并同时输出
 | Debian Style (.deb) | Debian, Ubuntu, Xandros, Linspire | apt-get, aptitude | dpkg | 
 | Red Hat Style (.rpm) | Fedora, CentOS, Red Hat Enterprise Linux, OpenSUSE, Mandriva, PCLinuxOS | yum | rpm |
 
+```
+// 检查是否安装过某软件包
+rpm -qa | grep "软件或者包的名字"
+dpkg -l | grep "软件或者包的名字"
+yum list installed | grep "软件名或者包名"
+```
 
 ## 4. 权限与进程
 ### id – 显示用户身份号
@@ -132,6 +156,7 @@ ps -ef | more // 查看当前运行的所有进程
 top // 查看进程，默认以CPU占有率排序
 top u tinker // 查看特定用户tinker的进程
 ```
+top命令输出的第一行后面的三个值是系统在1分钟、5分钟、15分钟内平均负载。**系统平均负载被定义为在特定时间间隔内运行队列中的平均进程数**。一般来说只要每个CPU的当前活动进程数不大于3那么系统的性能就是良好的，如果每个CPU的任务数大于5，那么就表示这台机器的性能有严重问题。假设系统有两个CPU，那么其每个CPU的当前任务数为：8.13/2=4.065。这表示该系统的性能是可以接受的。
 
 ### jobs – 列出任务
 ```
@@ -202,6 +227,7 @@ pgrep nginx // 查看nginx进程id
 ### vmstat - 显示资源使用快照
 
 显示资源快照,包括内存，交换分区和磁盘 I/O
+
 ```
 vmstat 5 // 5秒内的资源快照
 ```
@@ -245,6 +271,9 @@ find playground \( -type f -not -perm 0600 -exec chmod 0600 '{}' ';' \)
 find ~ -empty // 查找home目录下的所有空文件
 find ~ -type f -size 0 // 跟上面一条命令功能一样
 find ~ -iname "hello.php" // 查找hello.php文件
+find . -not -name ".sh" -maxdepth 1 // 查找所有非sh文件 -not可换成!
+find . -mtime 7 -type f // 搜索最近7天修改过的文件。
+//-atime 访问时间 (单位是天，分钟单位则是-amin）-mtime 修改时间 （内容被修改）-ctime 变化时间 （元数据或权限变化）
 ```
 
 ### grep - 根据文件内容查找文件
@@ -401,11 +430,13 @@ echo "lowercase letters" | tr [:lower:] [:upper:] // 小写转大写
 ```
 echo "front" | sed 's/front/back/' // 输出back
 sed -n '5,10p' /etc/passwd  // 查看文件5到10行
+sed '/^$/d' file // 删除空行
 ```
 ### awk - 文本分析工具
 ```
 awk '{print $2,$5;}' a.txt // 打印指定的2，5字段
-ps aux | grep mysql | grep -v grep |awk '{print $2}' |xargs kill -9 // 杀掉mysql进程 
+ps aux | grep mysql | grep -v grep |awk '{print $2}' | xargs kill -9 // 杀掉mysql进程 
+awk '{print $7}' access.log  | uniq -c | sort -nr | head -n10 // 访问最多的10个url
 ```
 ### head - 显示开头文字行
 ```
@@ -426,6 +457,18 @@ vim +/search_term file2.txt // 打开文件并调到第一个匹配的行
 vim -R /etc/passwd // 只读模式打开文件
 ```
 
+### xargs
+```
+find . -name '*.sh' -maxdepth 1 | xargs -I {} ls '{}' // -I指定替换字符
+```
+
+### wc - 统计行和字符的工具
+```
+wc -l file // 统计行数
+wc -w file // 统计单词数
+wc -c file // 统计字符数
+```
+
 ## 8. 网络管理
 ### ping - 发送 ICMP ECHO_REQUEST 软件包到网络主机
 ping 命令发送一个特殊的网络数据包，叫做 IMCP ECHO_REQUEST，到 一台指定的主机。大多数接收这个包的网络设备将会回复它，来允许网络连接验证。
@@ -442,6 +485,9 @@ ping www.cyub.me // 测试cyub.me网站
 ```
 netstat -ie // 查看系统网络接口
 netstat -r // 内核的网络路由表
+netstat -an|awk '/^tcp/{++S[$NF]}END{for (a in S)print a,S[a]}'   // 查看tcp链接数
+netstat -pant |grep ":80"|awk '{print $5}' | awk -F: '{print $1}'|sort|uniq -c|sort -nr  // 查看连接数最多的ip
+
 ```
 ### ftp - 因特网文件传输程序
 ### wget - 非交互式网络下载器
@@ -479,9 +525,17 @@ dig www.cyub.me a +trace // +trace参数将显示从根域逐级查询的过程
 
 ### scp
 
+
 ## 9. 系统相关
 
+### uptime
+
 ### ulimit
+linux 默认值 open files 和 max user processes 为 1024
+```
+ulimit -n // 最多打开文件数
+ulimit -u // 最多处理用户进程数
+```
 
 ### sysctl
 
@@ -516,9 +570,12 @@ shutdown -r now // 重启
 watch -n 10 'cat /proc/loadavg' // 每隔10s输出系统平均负载
 ```
 
+### strace - 进程跟踪
+
 
 ## 10. 相关资源
 * [The Linux Command Line 中文版](https://www.kancloud.cn/thinkphp/linux-command-line)
 * [Linux工具快速教程](http://linuxtools-rst.readthedocs.io/zh_CN/latest/index.html)
 * [UNIX TOOLBOX 中文版](http://cb.vu/unixtoolbox_zh_CN.xhtml)
 * [鸟哥的Linux 私房菜](http://linux.vbird.org/)
+* [搞定Linux Shell文本处理工具，看完这篇集锦就够了](https://zhuanlan.zhihu.com/p/29718871)
