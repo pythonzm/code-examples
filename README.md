@@ -20,3 +20,7 @@
     * [serve-caddy.sh](https://github.com/cyub/code-examples/tree/master/shell/serve-caddy.sh) 自动生成caddy服务器虚拟主机配置
 
     * [php-cgi.sh](https://github.com/cyub/code-examples/tree/master/shell/php-cgi.sh) php-cgi服务启动脚本
+    
+* [Linux commands](https://github.com/cyub/code-examples/blob/master/linux-commands/README.md)
+
+* [Mysql](https://github.com/cyub/code-examples/blob/master/mysql/README.md)
