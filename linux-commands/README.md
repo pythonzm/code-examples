@@ -53,7 +53,7 @@ stat查看文件时候，会显示三种类型时间：分别是Access time，Mo
 3. change time：表示我们最后一次对文件属性改变的时间，包括权限，大小，属性等等。chmod,chown会更改此时间。
 
 ```
-stat a.txt // 显示文件袋的mtime,atime,ctime
+stat a.txt // 显示文件的mtime,atime,ctime
 ls -l a.txt // 列出文件的mtime
 ls -lc a.txt // 列出文件的ctime
 ls -lu a.txt // 列出文件的atime
@@ -149,7 +149,51 @@ passwd tinker // 修改tinker账户密码
 ```
 ps aux // 查看当前允许进程
 ps -ef | more // 查看当前运行的所有进程
+ps -A --sort=-rss -o comm,pmem,pcpu | uniq -c |head -15 //按进程内存占用大小，从大到小来排序。RSS表示实际分配的内存大小
+ps -A --sort=%cpu -o comm,pmem,pcpu | head -10 // 按进程消耗cpu资源大小，从小大到大排序。--sort=-%cpu表示使用从大到小。排序字段为ps命令头部
+ps -c nginx --no-header | wc -l // 统计nginx进程数量
 ```
+
+**ps内容说明**
+
+| 项 | 说明 |
+| :------ | :------ |
+| %CPU | 进程的cpu占用率 |
+| %MEM | 进程的内存占用率 |
+| VSZ | 进程所使用的虚存的大小 |
+| RSS | 进程使用的驻留集大小或者是实际内存的大小 |
+| TTY | 与进程关联的终端（tty）|
+| STAT | 进程的状态 |
+| START |（进程启动时间和日期）|
+| TIME | （进程使用的总cpu时间）|
+| COMMAND | （正在执行的命令行命令）|
+| NI | (nice)优先级 |
+| PRI | 进程优先级编号 |
+| PPID | 父进程的进程ID（parent process id）|
+| SID  | 会话ID（session id）|
+| WCHAN | 进程正在睡眠的内核函数名称；该函数的名称是从/root/system.map文件中获得的 | 
+| FLAGS | 与进程相关的数字标识 |
+
+STAT值有：
+
+| 值 | 含义 | 
+| :------ | :------ |
+| R |running正在运行或准备运行| 
+| S | sleeping休眠 |
+| I | idle空闲 |
+| Z | 僵死 |
+| D | 不可中断的睡眠，通常是I/O|
+| P |等待交换页| 
+| W | 换出,表示当前页面不在内存 | 
+| N | 低优先级任务 | 
+| T | terminate终止 |
+| W | 进入内存交换（从内核2.6开始无效） | 
+| < | 高优先级 | 
+| L | 有些页被锁进内存 | 
+| + | 位于后台的进程组 |
+| l | 多线程，克隆线程 |
+| s  | 包含子进程 |
+
 
 ### top - 动态查看进程
 ```
@@ -185,10 +229,10 @@ fg 2 前台重启一个作业
 
 | 编号 | 名字 | 含义 |
 | :------ | :------ | :------ |
-| 1 | HUP | 挂起。这是美好往昔的痕迹，那时候终端机通过电话线和调制解调器连接到 远端的计算机。这个信号被用来告诉程序，控制的终端机已经“挂起”。 通过关闭一个终端会话，可以说明这个信号的作用。发送这个信号到终端机上的前台程序，程序会终止。许多守护进程也使用这个信号，来重新初始化。这意味着，当发送这个信号到一个守护进程后， 这个进程会重新启动，并且重新读取它的配置文件。Apache 网络服务器守护进程就是一个例子。|
+| 1 | HUP | 挂起。许多守护进程也使用这个信号，来重新初始化。这意味着，当发送这个信号到一个守护进程后， 这个进程会重新启动，并且重新读取它的配置文件。|
 | 2 | INT | 中断。实现和 Ctrl-c 一样的功能，由终端发送。通常，它会终止一个程序。 |
 | 3 | QUIT | 退出 |
-| 9 | KILL | 杀死。这个信号很特别。鉴于进程可能会选择不同的方式，来处理发送给它的 信号，其中也包含忽略信号，这样呢，从不发送 Kill 信号到目标进程。而是内核立即终止 这个进程。当一个进程以这种方式终止的时候，它没有机会去做些“清理”工作，或者是保存劳动成果。 因为这个原因，把 KILL 信号看作杀手锏，当其它终止信号失败后，再使用它。 |
+| 9 | KILL | 杀死。这个信号很特别。鉴于进程可能会选择不同的方式，来处理发送给它的 信号，其中也包含忽略信号，这样呢，从不发送Kill信号到目标进程。而是内核立即终止 这个进程。当一个进程以这种方式终止的时候，它没有机会去做些“清理”工作，或者是保存劳动成果。 因为这个原因，把 KILL 信号看作杀手锏，当其它终止信号失败后，再使用它。 |
 | 11 | SEGV | 段错误。如果一个程序非法使用内存，就会发送这个信号。也就是说， 程序试图写入内存，而这个内存空间是不允许此程序写入的。 |
 | 15 | TERM | 终止。这是 kill 命令发送的默认信号。如果程序仍然“活着”，可以接受信号，那么 这个信号终止。 |
 | 18 | CONT | 继续。在停止一段时间后，进程恢复运行。 |
@@ -227,7 +271,7 @@ pgrep nginx // 查看nginx进程id
 ### vmstat - 显示资源使用快照
 
 显示资源快照,包括内存，交换分区和磁盘 I/O
-
+[Linux系统负载LoadAverage详解](http://blog.chinaunix.net/uid-25723371-id-3534724.html)
 ```
 vmstat 5 // 5秒内的资源快照
 ```
@@ -437,6 +481,9 @@ sed '/^$/d' file // 删除空行
 awk '{print $2,$5;}' a.txt // 打印指定的2，5字段
 ps aux | grep mysql | grep -v grep |awk '{print $2}' | xargs kill -9 // 杀掉mysql进程 
 awk '{print $7}' access.log  | uniq -c | sort -nr | head -n10 // 访问最多的10个url
+cat /proc/meminfo | awk '/^MemTotal/{ers/{j=$0}/^Cached/{k=$0}END{printf("%s\n%s\n%s\n%s\n", h,i,j,k)}' // 查看内存信息
+awk -F '[][]' '{print $3}' file // []作为分隔符
+
 ```
 ### head - 显示开头文字行
 ```
@@ -455,7 +502,26 @@ tail -f /var/log/messages // 不停去读取最新内容
 vim +10 file1.txt // 打开文件并调到第10行
 vim +/search_term file2.txt // 打开文件并调到第一个匹配的行
 vim -R /etc/passwd // 只读模式打开文件
+
 ```
+
+**替换字符用法**
+
+语法：[addr]s/源字符串/目的字符串/[option]
+```
+:s/vivian/sky/ 替换当前行第一个 vivian 为 sky
+:s/vivian/sky/g 替换当前行所有 vivian 为 sky
+:n,$s/vivian/sky/g 替换第 n 行开始到最后一行中每一行所有 vivian 为 sky（n 为数字，若 n 为 .，表示从当前行开始到最后一行）
+:%s/vivian/sky/（等同于 :g/vivian/s//sky/）替换每一行的第一个 vivian 为 sky
+:%s/vivian/sky/g（等同于 :g/vivian/s//sky/g）替换每一行中所有 vivian 为 sky
+```
+
+| 参数 | 说明 |
+| :------ | :------ |
+| [addr] | 表示检索范围，省略时表示当前行。"1，20" ：表示从第1行到20行；"%"：表示整个文件，同"1,\$"；". ,\$" ：从当前行到文件尾；|
+|s  | 表示替换操作 |
+| [option] | 表示操作类型:g 表示全局替换;c 表示进行确认;p 表示替代结果逐行显示（Ctrl + L恢复屏幕);省略option时仅对每行第一个匹配串进行替换；如果在源字符串和目的字符串中出现特殊字符，需要用”\”转义 |
+
 
 ### xargs
 ```
@@ -469,25 +535,63 @@ wc -w file // 统计单词数
 wc -c file // 统计字符数
 ```
 
+### split - 切割文件
+split用于将文件切割成多个小文件
+
+表7.4 split选项
+
+| 选项 | 说明 |
+| :------ | :------ |
+| b |  每一个新文件的大小，单位为byte|
+| C | 每一个文件单行的最大byte数 |
+| d | 新文件名以数字作为后缀 |
+| l |  每一个新文件的列数大小 |
+
+```
+split -b 10k date.file // 将文件分割成大小为10KB的小文件
+split -b 10k date.file -d -a 3 new_file_name // 将文件分割成大小为10KB的小文件, 新文件名以数字作为后缀
+split -l 10 date.file // 把文件分割成每个包含10行的小文件
+```
+
 ## 8. 网络管理
 ### ping - 发送 ICMP ECHO_REQUEST 软件包到网络主机
-ping 命令发送一个特殊的网络数据包，叫做 IMCP ECHO_REQUEST，到 一台指定的主机。大多数接收这个包的网络设备将会回复它，来允许网络连接验证。
+ping 命令发送一个特殊的网络数据包，叫做IMCP ECHO_REQUEST，到 一台指定的主机。大多数接收这个包的网络设备将会回复它，来允许网络连接验证，反应连接速度。
 
-注意：大多数网络设备（包括 Linux 主机）都可以被配置为忽略这些数据包。通常，这样做是出于网络安全 原因，部分地遮蔽一台主机免受一个潜在攻击者地侵袭。配置防火墙来阻塞 IMCP 流量也很普遍。
+注意：大多数网络设备（包括 Linux 主机）都可以被配置为忽略这些数据包。通常，这样做是出于网络安全 原因，部分地遮蔽一台主机免受一个潜在攻击者地侵袭。配置防火墙来阻塞IMCP流量也很普遍。
 
 ```
 ping www.cyub.me // 测试cyub.me网站
+ping -c 5 www.cyub.me // 发送5个数据包
 ```
 ### traceroute - 打印到一台网络主机的路由数据包
- traceroute程序（一些系统使用相似的 tracepath 程序来代替）会显示从本地到指定主机 要经过的所有“跳数”的网络流量列表
+ 显示从本地到指定主机 要经过的所有路由
+ ```
+traceroute www.cyub.me
+ ```
 
 ### netstat - 网络查看工具
+
+表7.5 netstat常见选项
+
+| 选项 | 说明 |
+| :------ | :------ |
+| a | 显示所有连线中的Socket |
+| l | 显示监控中的服务器的Socket |
+| n | 直接使用ip地址，而不通过域名服务器 | 
+| p | 显示正在使用Socket的程序识别码和程序名称 | 
+| r | 显示Routing Table |
+| t | 显示TCP传输协议的连线状况 |
+| u |显示UDP传输协议的连线状况 |
+| e | 显示网络其他相关信息 |
+| i | 显示网络界面信息表单 |
+| o | 显示计时器 |
+
 ```
 netstat -ie // 查看系统网络接口
 netstat -r // 内核的网络路由表
 netstat -an|awk '/^tcp/{++S[$NF]}END{for (a in S)print a,S[a]}'   // 查看tcp链接数
 netstat -pant |grep ":80"|awk '{print $5}' | awk -F: '{print $1}'|sort|uniq -c|sort -nr  // 查看连接数最多的ip
-
+netstat -tunlp|grep 22 // 查看22端口情况
 ```
 ### ftp - 因特网文件传输程序
 ### wget - 非交互式网络下载器
@@ -496,7 +600,7 @@ wget http://www.cyub.me
 wget http://www.cyub.me -O a.html
 ```
 
-### ssh - OpenSSH SSH 客户端
+### ssh - SSH 客户端
 ```
 ssh test@baidu.com // 以test用户身份登录baidu.com主机
 ```
@@ -508,7 +612,7 @@ nslookup www.cyub.me
 
 ### dig - 查看dns解析
 ```
-dig www.cyub.me // 查询域名的A记录
+dig www.cyub.me a // 查询域名的A记录，最后的a可省略
 dig www.cyub.me mx // 查询域名的mx记录，其他类型的记录有MX，CNAME，NS，PTR等，默认a记录
 dig @10.255.1.174 www.cyub.me // 指定dns服务器
 dig www.cyub.me a +tcp // dig默认使用udp协议进行查询，+tcp参数则指定tcp方式查询
@@ -570,7 +674,37 @@ shutdown -r now // 重启
 watch -n 10 'cat /proc/loadavg' // 每隔10s输出系统平均负载
 ```
 
-### strace - 进程跟踪
+### strace - 跟踪程序执行
+strace命令是一个集诊断、调试、统计与一体的工具
+
+表9.1 strace常用选项
+
+| 选项 | 说明 |
+| :------ | :------ |
+| -p | 指定跟踪进程的pid |
+| -c | 统计每一系统调用的所执行的时间,次数和出错的次数等 |
+| -f | 跟踪由fork调用所产生的子进程 |  
+| -ff | 如果提供-o filename,则所有进程的跟踪结果输出到相应的filename.pid中,pid是各进程的进程号 |
+| -t | 在输出中的每一行前加上时间信息. -tt 在输出中的每一行前加上时间信息,微秒级 |
+| -T | 显示每一调用所耗的时间，每个调用的时间花销现在在调用行最右边的尖括号里面 |
+| -o  | 将strace的输出写入文件filename，如果不指定-o参数的话，默认的输出设备是STDERR |
+| -e | 指定一个表达式,用来控制如何跟踪。格式：[qualifier=][!]value1[,value2]... qualifier只能是trace,abbrev,verbose,raw,signal,read,write其中之一.value是用来限定的符号或数字.默认的 qualifier是 trace.感叹号是否定符号.例如:-eopen等价于 -e trace=open,表示只跟踪open调用.而-etrace!=open 表示跟踪除了open以外的其他调用.有两个特殊的符号 all 和 none. 注意有些shell使用!来执行历史记录里的命令,所以要使用\\. |
+
+-e选项常用正则如下：
+默认的为trace=all. 
++ -e trace=file 只跟踪有关文件操作的系统调用. 
++ -e trace=process 只跟踪有关进程控制的系统调用. 
++ -e trace=network 跟踪与网络有关的所有系统调用. 
++ -e strace=signal 跟踪所有与系统信号有关的系统调用 
++ -e trace=ipc 跟踪所有与进程通讯有关的系统调用
+
+```
+strace -e open,access 2>&1 | grep your-filename // 查看打开文件情况
+strace -e open php 2>&1 | grep php.ini // 查看php加载php.ini信息
+strace -c >/dev/null ls // 跟踪ls命令执行情况
+strace -f $(pidof php-fpm | sed 's/\([0-9]*\)/\-p \1/g') // 查看php-fpm进程情况
+strace -f -tt -o /tmp/php.trace -s1024 -p `pidof php5-fpm | tr ' ' ','` // 同上
+```
 
 
 ## 10. 相关资源
@@ -579,3 +713,4 @@ watch -n 10 'cat /proc/loadavg' // 每隔10s输出系统平均负载
 * [UNIX TOOLBOX 中文版](http://cb.vu/unixtoolbox_zh_CN.xhtml)
 * [鸟哥的Linux 私房菜](http://linux.vbird.org/)
 * [搞定Linux Shell文本处理工具，看完这篇集锦就够了](https://zhuanlan.zhihu.com/p/29718871)
+* [Linux命令大全](http://man.linuxde.net/)
