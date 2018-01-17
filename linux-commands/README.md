@@ -706,6 +706,16 @@ strace -f $(pidof php-fpm | sed 's/\([0-9]*\)/\-p \1/g') // 查看php-fpm进程�
 strace -f -tt -o /tmp/php.trace -s1024 -p `pidof php5-fpm | tr ' ' ','` // 同上
 ```
 
+### timedatectl - 查看和设置时间
+timedatectl是用来查询和修改系统时间和配置的Linux应用程序。它是systemd 系统服务管理的一部分，并且允许你检查和修改系统时钟的配置。
+```bash
+timedatectl // 查看当前时间和时区
+timedatectl set-time YYYY-MM-DD // 设置日期
+timedatectl set-time HH:MM:SS // 设置时间
+timedatectl list-timezones // 查看所有时区
+timedatectl set-timezone 'Asia/Shanghai' // 设置时区
+timedatectl set-ntp yes // 设置NTP同步，使用“no”关闭NTP同步，使用“yes”开启
+```
 
 ## 10. 相关资源
 * [The Linux Command Line 中文版](https://www.kancloud.cn/thinkphp/linux-command-line)
