@@ -619,7 +619,26 @@ dig www.cyub.me a +tcp // dig默认使用udp协议进行查询，+tcp参数则�
 dig www.cyub.me a +trace // +trace参数将显示从根域逐级查询的过程
 ```
 
-### curl
+### curl - 传输数据工具
+```
+curl www.cyub.me // 查看网页内容
+curl -s -o cyub.me.txt www.cyub.me // 保存网页内容, -s表示silent，不会显示下载进度
+curl -O --progress -C www.cyub.me/file.zip // 下载文件，本地文件名称与远程服务器文件名称一样。--progress显示进度条,-C继续断点下载
+curl --head(I) www.cyub.me // 查看网页响应头
+curl --data(d) "birthyear=1905&press=%20OK%20" www.cyub.me // 以Content-Type=application/x-www-form-urlencoded形式
+// POST数据，此时的数据需要urlencode处理好
+curl --data-urlencode "name=I am Daniel" www.cyub.me // 跟上一条命令类似，但数据不用预先编码处理
+curl --form upload=@localfilename --form press=OK www.cyub.me // 文件上传，Content-Type是multipart/form-data
+curl --proxy proxy.cyub.me:4321 www.cyub.me/ // 设置代理
+curl --user name:password www.cyub.me // Basic Authentication
+curl --cookie "name=tinker" www.cyub.me // cookie
+curl --dump-header headers_and_cookies www.cyub.me
+curl --header(H) "Content-Type: text/xml"  --request www.cyub.me
+curl --request(X) POST www.cyub.me // 指定请求方法
+curl -v www.cyub.me // 显示通信过程
+curl --trace output.txt www.cyub.me // 显示通信过程，内容比上一条命令详细
+curl --trace-ascii dump.txt www.cyub.me // 显示通信过程
+```
 
 ### tcpdump
 
@@ -724,3 +743,4 @@ timedatectl set-ntp yes // 设置NTP同步，使用“no”关闭NTP同步，使
 * [鸟哥的Linux 私房菜](http://linux.vbird.org/)
 * [搞定Linux Shell文本处理工具，看完这篇集锦就够了](https://zhuanlan.zhihu.com/p/29718871)
 * [Linux命令大全](http://man.linuxde.net/)
+* [Using curl to automate HTTP jobs](https://curl.haxx.se/docs/httpscripting.html)
