@@ -74,9 +74,9 @@ ngxin -c nginx.conf > /dev/null 2>&1 & // 屏蔽标准和错误输出
 ```
 
 ## 3. 包管理
-不同的 Linux 发行版使用不同的打包系统，一般而言，大多数发行版分别属于两大包管理技术阵营： Debian 的”.deb”，和红帽的”.rpm”。也有一些重要的例外，比方说 Gentoo， Slackware，和 Foresight，但大多数会使用这两个基本系统中的一个。
+不同的 Linux 发行版使用不同的打包系统。一般而言，大多数发行版分别属于两大包管理技术阵营： Debian 的”.deb”，和红帽的”.rpm”。也有一些重要的例外，比方说 Gentoo， Slackware，和 Foresight，但大多数会使用这两个基本系统中的一个。
 
-软件包管理系统通常由两种工具类型组成：底层工具用来处理这些任务，比方说安装和删除软件包文件， 和上层工具，完成元数据搜索和依赖解析。
+软件包管理系统通常由两种工具类型组成：**底层工具用来处理这些任务，比方说安装和删除软件包文件**， 和**上层工具完成元数据搜索和依赖解析**。
 
 表3.1主要的包管理系统家族
 
@@ -121,8 +121,8 @@ chmod u+x,go=rw a.txt //给文件拥有者执行权限并给组和其他人读�
 ### su - 切换用户
 ```
 su // 切换成root用户，默认root用户
-su - // 切换成用户，并切换环境
-su - tinker // 切换成tinker用户，并切换环境
+su - // 切换成root用户，并切换环境
+su - tinker // 切换成tinker，并切换环境
 ```
 
 ### sudo - 使用其他身份执行命令
@@ -200,7 +200,11 @@ STAT值有：
 top // 查看进程，默认以CPU占有率排序
 top u tinker // 查看特定用户tinker的进程
 ```
-top命令输出的第一行后面的三个值是系统在1分钟、5分钟、15分钟内平均负载。**系统平均负载被定义为在特定时间间隔内运行队列中的平均进程数**。一般来说只要每个CPU的当前活动进程数不大于3那么系统的性能就是良好的，如果每个CPU的任务数大于5，那么就表示这台机器的性能有严重问题。假设系统有两个CPU，那么其每个CPU的当前任务数为：8.13/2=4.065。这表示该系统的性能是可以接受的。
+top命令输出的第一行后面的三个值是系统在1分钟、5分钟、15分钟内平均负载。
+
+**系统平均负载被定义为在特定时间间隔内运行队列中的平均进程数**。
+
+一般来说只要每个CPU的当前活动进程数不大于3那么系统的性能就是良好的，如果每个CPU的任务数大于5，那么就表示这台机器的性能有严重问题。假设系统有两个CPU，那么其每个CPU的当前任务数为：8.13/2=4.065。这表示该系统的性能是可以接受的。
 
 ### jobs – 列出任务
 ```
@@ -264,18 +268,6 @@ pstree
 pgrep nginx // 查看nginx进程id
 ```
 
-### htop
-
-### iotop
-
-### vmstat - 显示资源使用快照
-
-显示资源快照,包括内存，交换分区和磁盘 I/O
-[Linux系统负载LoadAverage详解](http://blog.chinaunix.net/uid-25723371-id-3534724.html)
-```
-vmstat 5 // 5秒内的资源快照
-```
-
 
 ## 5. 文件查找
 
@@ -306,7 +298,7 @@ find ~ -type f -name '*.BAK' -delete // 删除扩展名为“.BAK”（这通常
 find ~ -type f -name '*.BAK' -print // 查看找到的文件
 find ~ -type f -name 'foo*' -exec ls -l '{}' ';' // {}是当前路径名的符号表示，分号是要求的界定符 表明命令结束。
 find ~ -type f -name 'foo*' -ok ls -l '{}' ';' // 使用 -ok 行为来代替 -exec，在执行每个指定的命令之前，会提示用户
-find ~ -type f -name 'foo*' -exec ls -l '{}' +  // 把末尾的分号改为加号，就激活了 find 命令的一个功能，
+find ~ -type f -name 'foo*' -exec ls -l '{}' +  // 把末尾的分号改为加号，就激活了find命令的一个功能，
 // 把搜索结果结合为一个参数列表， 然后执行一次所期望的命令
 find playground -type f -name 'file-A' | wc -l // 查找名字为file-A的文件
 find playground \( -type f -not -perm 0600 \) -or \( -type d -not -perm 0700 \)
@@ -315,15 +307,15 @@ find playground \( -type f -not -perm 0600 -exec chmod 0600 '{}' ';' \)
 find ~ -empty // 查找home目录下的所有空文件
 find ~ -type f -size 0 // 跟上面一条命令功能一样
 find ~ -iname "hello.php" // 查找hello.php文件
-find . -not -name ".sh" -maxdepth 1 // 查找所有非sh文件 -not可换成!
+find . -not -name ".sh" -maxdepth 1 // 查找所有非sh文件,-not可换成!
 find . -mtime 7 -type f // 搜索最近7天修改过的文件。
-//-atime 访问时间 (单位是天，分钟单位则是-amin）-mtime 修改时间 （内容被修改）-ctime 变化时间 （元数据或权限变化）
+//-atime:访问时间 (单位是天，分钟单位则是-amin, -mtime:修改时间（内容被修改）,-ctime:变化时间 （元数据或权限变化）
 ```
 
 ### grep - 根据文件内容查找文件
 ```
 grep -i "hello" hello.php // 在hello.php里面不区分大小写的查找hello
-grep -A 3 -i "hello" // 输出成功匹配的行，以及该行之后的三行，-B选项之之前
+grep -A 3 -i "hello" // 输出成功匹配的行，以及该行之后的三行，-B选项之前
 grep -r "hello" dir1/ // 递归查找dir1目录下文件的匹配行
 ```
 
@@ -494,7 +486,7 @@ head -c 100 a.txt 显示最开始100个字符
 ### tail
 ```
 tail -n 10 a.txt // 查看文件最后10行
-tail -f /var/log/messages // 不停去读取最新内容
+tail -f /var/log/messages // 不停得读取最新内容
 ```
 
 ### vim
@@ -641,6 +633,9 @@ curl --trace-ascii dump.txt www.cyub.me // 显示通信过程
 ```
 
 ### tcpdump
+```
+ tcpdump -i eth0 not port 22
+```
 
 ### ifconfig
 
@@ -649,37 +644,174 @@ curl --trace-ascii dump.txt www.cyub.me // 显示通信过程
 ### scp
 
 
-## 9. 系统相关
+## 9. 系统监控
 
 ### uptime
 
-### ulimit
-linux 默认值 open files 和 max user processes 为 1024
+### htop
+
+### iotop
+
+### vmstat - 显示资源使用快照
+
+显示资源快照,包括内存，交换分区和磁盘 I/O
+
 ```
-ulimit -n // 最多打开文件数
-ulimit -u // 最多处理用户进程数
+vmstat 1 // 1秒内的资源快照
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 0  0 488124 105284  96596 429796    0    1     4     6   23   12  0  0 99  0  0
+ 0  0 488124 105160  96596 429796    0    0     0     0  280  554  0  1 99  0  0
+ 0  0 488124 105160  96596 429804    0    0     0     0  260  544  1  0 99  0  0
+ 0  0 488124 105160  96596 429796    0    0     0     0  254  539  0  1 99  0  0
+ 0  0 488124 105160  96596 429804    0    0     0     0  268  550  0  1 99  0  0
+ 0  0 488124 105160  96600 429792    0    0     0    64  680 1456  2  3 95  0  0
+ 1  0 488112  96972  96608 429812    0    0     0    40  824 1393 31  4 65  0  0
+ 0  0 488112  96880  96608 429804    0    0     0     0  269  566  0  0 100  0  0
 ```
 
-### sysctl
+**说明：**
 
-### nice
+<table>
+<thead>
+<tr>
+<th style="text-align:left">项</th>
+<th style="text-align:left">列</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td style="text-align:left" rowspan ="2">procs</td>
+    <td style="text-align:left">r</td>
+    <td style="text-align:left">运行队列中进程数量，如果长期大于1，说明cpu不足，需要增加cpu</td>
+</tr>
+<tr>
+    <td style="text-align:left">b</td>
+    <td style="text-align:left">等待IO的进程数量</td>
+</tr>
+
+<tr>
+    <td style="text-align:left" rowspan ="4">memory</td>
+    <td style="text-align:left">swpd</td>
+    <td style="text-align:left">使用虚拟内存大小，如果swpd的值不为0，但是SI，SO的值长期为0，这种情况不会影响系统性能</td>
+</tr>
+<tr>
+    <td style="text-align:left">free</td>
+    <td style="text-align:left">空闲物理内存大小(单位k)</td>
+</tr>
+<tr>
+    <td style="text-align:left">buff</td>
+    <td style="text-align:left">用作缓冲的内存大小</td>
+</tr>
+<tr>
+    <td style="text-align:left">cache</td>
+    <td style="text-align:left">用作缓存的内存大小，如果cache的值大的时候，说明cache处的文件数多，如果频繁访问到的文件都能被cache处，那么磁盘的读IO bi会非常小</td>
+</tr>
+
+<tr>
+    <td style="text-align:left" rowspan ="2">system</td>
+    <td style="text-align:left">in</td>
+    <td style="text-align:left">表示在某一时间间隔中观测到的每秒设备中断数</td>
+</tr>
+<tr>
+    <td style="text-align:left">cs</td>
+    <td style="text-align:left">表表示每秒产生的上下文切换次数，如当 cs 比磁盘 I/O 和网络信息包速率高得多，都应进行进一步调查</td>
+</tr>
+
+<tr>
+    <td style="text-align:left" rowspan ="2">swap</td>
+    <td style="text-align:left">si</td>
+    <td style="text-align:left">由内存进入内存交换区数量</td>
+</tr>
+<tr>
+    <td style="text-align:left">so</td>
+    <td style="text-align:left">由内存交换区进入内存数量</td>
+</tr>
+
+<tr>
+    <td style="text-align:left" rowspan ="2">io</td>
+    <td style="text-align:left">bi</td>
+    <td style="text-align:left">每秒读取的块数(默认块的大小为1kb)</td>
+</tr>
+<tr>
+    <td style="text-align:left">bo</td>
+    <td style="text-align:left">每秒写入的块数</td>
+</tr>
+
+<tr>
+    <td style="text-align:left" rowspan ="4">cpu</td>
+    <td style="text-align:left">us</td>
+    <td style="text-align:left">显示了用户方式下所花费 CPU 时间的百分比。us的值比较高时，说明用户进程消耗的cpu时间多，但是如果长期大于50%，需要考虑优化用户的程序</td>
+</tr>
+<tr>
+    <td style="text-align:left">sy</td>
+    <td style="text-align:left">显示了内核进程所花费的cpu时间的百分比。这里us + sy的参考值为80%，如果us+sy大于80%说明可能存在CPU不足</td>
+</tr>
+<tr>
+<td style="text-align:left">id</td>
+<td style="text-align:left">显示了cpu处在空闲状态的时间百分比</td>
+</tr>
+<tr>
+<td style="text-align:left">wa</td>
+<td style="text-align:left">显示了IO等待所占用的CPU时间的百分比。这里wa的参考值为30%，如果wa超过30%，说明IO等待严重，这可能是磁盘大量随机访问造成的，也可能磁盘或者磁盘访问控制器的带宽瓶颈造成的(主要是块操作)。</td>
+</tr>
+</tbody>
+</table>
+
+### iostat - 监视系统输入输出设备和CPU的使用情况
+
+常用选项
+
+| 选项 | 说明 |
+| :------ | :------ |
+| -c | 仅显示CPU使用情况  |
+| -d | 仅显示设备利用率 |
+| -k | 显示状态以千字节每秒为单位，而不使用块每秒 |
+| -m | 显示状态以兆字节每秒为单位 |
+| -p | 仅显示块设备和所有被使用的其他分区的状态 |
+| -t | 显示每个报告产生时的时间 |
+| -x | 显示扩展状态 |
+
+```
+ iostat -x
+Linux 4.4.0-101-generic (vagrant)   02/10/2018  _x86_64_    (1 CPU)
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           0.20    0.01    0.29    0.03    0.00   99.48
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0.02     0.73    0.24    0.78     3.76     6.20    19.47     0.00    0.45    0.62    0.40   0.33   0.03
+dm-0              0.00     0.00    0.22    1.18     3.55     5.39    12.77     0.00    0.44    0.60    0.42   0.24   0.03
+dm-1              0.00     0.00    0.04    0.20     0.15     0.81     8.03     0.00    5.62    0.51    6.57   0.05   0.00
+```
+
+** 说明 **
+
+| 标示 | 说明  |
+| :------ | :------ |
+| Device  | 监测设备名称
+| rrqm/s  | 每秒需要读取需求的数量 |
+| wrqm/s  | 每秒需要写入需求的数量 | 
+| r/s   |  每秒实际读取需求的数量 |
+| w/s | 每秒实际写入需求的数量 |
+| rsec/s | 每秒读取区段的数量 |
+| wsec/s | 每秒写入区段的数量 |
+| rkB/s  | 每秒实际读取的大小，单位为KB |
+| wkB/s  | 每秒实际写入的大小，单位为KB |
+| avgrq-sz |  需求的平均大小区段 |
+| avgqu-sz |  需求的平均队列长度 |
+| await | 等待I/O平均的时间（milliseconds）|
+| svctm | I/O需求完成的平均时间 |
+| %util | 被I/O需求消耗的CPU百分比 |
+
+### systemctl
 
 ### lsof
-
-### uname
-```
-uname -a // 查看系统信息
-```
-
-### ssh-keygen
-
-### openssl
 
 ### free
 
 ### df
-
-### date
 
 ### shutdown - 系统关机
 ```
@@ -725,6 +857,21 @@ strace -f $(pidof php-fpm | sed 's/\([0-9]*\)/\-p \1/g') // 查看php-fpm进程�
 strace -f -tt -o /tmp/php.trace -s1024 -p `pidof php5-fpm | tr ' ' ','` // 同上
 ```
 
+
+## 10. 其他
+
+### ulimit
+linux 默认值 open files 和 max user processes 为 1024
+```
+ulimit -n // 最多打开文件数
+ulimit -u // 最多处理用户进程数
+```
+
+### uname
+```
+uname -a // 查看系统信息
+```
+
 ### timedatectl - 查看和设置时间
 timedatectl是用来查询和修改系统时间和配置的Linux应用程序。它是systemd 系统服务管理的一部分，并且允许你检查和修改系统时钟的配置。
 ```bash
@@ -736,7 +883,17 @@ timedatectl set-timezone 'Asia/Shanghai' // 设置时区
 timedatectl set-ntp yes // 设置NTP同步，使用“no”关闭NTP同步，使用“yes”开启
 ```
 
-## 10. 相关资源
+
+### nice
+
+### ssh-keygen
+
+### openssl
+
+### date
+
+
+## 11. 相关资源
 * [The Linux Command Line 中文版](https://www.kancloud.cn/thinkphp/linux-command-line)
 * [Linux工具快速教程](http://linuxtools-rst.readthedocs.io/zh_CN/latest/index.html)
 * [UNIX TOOLBOX 中文版](http://cb.vu/unixtoolbox_zh_CN.xhtml)
