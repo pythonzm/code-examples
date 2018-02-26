@@ -82,7 +82,7 @@ ngxin -c nginx.conf > /dev/null 2>&1 & // 屏蔽标准和错误输出
 
 | 包管理系统 | 发行版 (部分列表) | 上层工具 | 底层工具 |
 | :------ | :------ | :------ | :------ |
-| Debian Style (.deb) | Debian, Ubuntu, Xandros, Linspire | apt-get, aptitude | dpkg | 
+| Debian Style (.deb) | Debian, Ubuntu, Xandros, Linspire | apt-get, aptitude | dpkg |
 | Red Hat Style (.rpm) | Fedora, CentOS, Red Hat Enterprise Linux, OpenSUSE, Mandriva, PCLinuxOS | yum | rpm |
 
 ```
@@ -171,25 +171,25 @@ ps -c nginx --no-header | wc -l // 统计nginx进程数量
 | PRI | 进程优先级编号 |
 | PPID | 父进程的进程ID（parent process id）|
 | SID  | 会话ID（session id）|
-| WCHAN | 进程正在睡眠的内核函数名称；该函数的名称是从/root/system.map文件中获得的 | 
+| WCHAN | 进程正在睡眠的内核函数名称；该函数的名称是从/root/system.map文件中获得的 |
 | FLAGS | 与进程相关的数字标识 |
 
 STAT值有：
 
-| 值 | 含义 | 
+| 值 | 含义 |
 | :------ | :------ |
-| R |running正在运行或准备运行| 
+| R |running正在运行或准备运行|
 | S | sleeping休眠 |
 | I | idle空闲 |
 | Z | 僵死 |
 | D | 不可中断的睡眠，通常是I/O|
-| P |等待交换页| 
-| W | 换出,表示当前页面不在内存 | 
-| N | 低优先级任务 | 
+| P |等待交换页|
+| W | 换出,表示当前页面不在内存 |
+| N | 低优先级任务 |
 | T | terminate终止 |
-| W | 进入内存交换（从内核2.6开始无效） | 
-| < | 高优先级 | 
-| L | 有些页被锁进内存 | 
+| W | 进入内存交换（从内核2.6开始无效） |
+| < | 高优先级 |
+| L | 有些页被锁进内存 |
 | + | 位于后台的进程组 |
 | l | 多线程，克隆线程 |
 | s  | 包含子进程 |
@@ -302,7 +302,7 @@ find ~ -type f -name 'foo*' -exec ls -l '{}' +  // 把末尾的分号改为加�
 // 把搜索结果结合为一个参数列表， 然后执行一次所期望的命令
 find playground -type f -name 'file-A' | wc -l // 查找名字为file-A的文件
 find playground \( -type f -not -perm 0600 \) -or \( -type d -not -perm 0700 \)
-find playground \( -type f -not -perm 0600 -exec chmod 0600 '{}' ';' \) 
+find playground \( -type f -not -perm 0600 -exec chmod 0600 '{}' ';' \)
 -or \( -type d -not -perm 0711 -exec chmod 0700 '{}' ';' \)
 find ~ -empty // 查找home目录下的所有空文件
 find ~ -type f -size 0 // 跟上面一条命令功能一样
@@ -383,7 +383,7 @@ tar -jtvf /path/to/foo.tgz // 查看.bz2归档文件的文件列表
 
 注意 source 和 destination 两者之一必须是本地文件。rsync 不支持远端到远端的复制
 ```
-rsync -av --delete /etc /home /usr/local /media/BigDisk/backup 
+rsync -av --delete /etc /home /usr/local /media/BigDisk/backup
 // 备份文件到backup目录。--delete来删除可能在备份设备中已经存在但却不再存在于源设备中的文件
 rsync -av --delete --rsh=ssh /etc /home /usr/local remote-sys:/backup
 // --rsh=ssh 选项，其指示rsync使用ssh程序作为它的远程 shell。
@@ -410,13 +410,13 @@ cat -ns a.txt // -n:给文本行添加行号，-s:禁止输出多个空白行
 | -k | -k=field1[,field2],对从field1到field2之间的字符排序，而不是整个文本行。看下面的讨论 |
 | -m | 把每个参数看作是一个预先排好序的文件。把多个文件合并成一个排好序的文件，而没有执行额外的排序 |
 | -o | 把排好序的输出结果发送到文件，而不是标准输出 |
-| -t | 定义域分隔字符。默认情况下，域由空格或制表符分隔 | 
+| -t | 定义域分隔字符。默认情况下，域由空格或制表符分隔 |
 
 ```
 sort > foo.txt // 将标准输入内容排序好后存入到foo.txt文件
 ls -l /usr/bin | sort -nr -k 5 | head // 将/usr/bin目录下文件按大小排序
 sort file1.txt file2.txt file3.txt > final_sorted_list.txt // 合并有序文件
-sort -k 1,1 -k 2n -k 3.7n foo.txt 
+sort -k 1,1 -k 2n -k 3.7n foo.txt
 // 多字段排序，对第一个字段执行字母排序，第二个字段执行数值排序，第三个字段的第七个字符按数值排序
 sort -t ':' -k 7 /etc/passwd | head // passwd文件的分隔符是:, 按照第七个字段分割
 ```
@@ -471,7 +471,7 @@ sed '/^$/d' file // 删除空行
 ### awk - 文本分析工具
 ```
 awk '{print $2,$5;}' a.txt // 打印指定的2，5字段
-ps aux | grep mysql | grep -v grep |awk '{print $2}' | xargs kill -9 // 杀掉mysql进程 
+ps aux | grep mysql | grep -v grep |awk '{print $2}' | xargs kill -9 // 杀掉mysql进程
 awk '{print $7}' access.log  | uniq -c | sort -nr | head -n10 // 访问最多的10个url
 cat /proc/meminfo | awk '/^MemTotal/{ers/{j=$0}/^Cached/{k=$0}END{printf("%s\n%s\n%s\n%s\n", h,i,j,k)}' // 查看内存信息
 awk -F '[][]' '{print $3}' file // []作为分隔符
@@ -569,8 +569,8 @@ traceroute www.cyub.me
 | :------ | :------ |
 | a | 显示所有连线中的Socket |
 | l | 显示监控中的服务器的Socket |
-| n | 直接使用ip地址，而不通过域名服务器 | 
-| p | 显示正在使用Socket的程序识别码和程序名称 | 
+| n | 直接使用ip地址，而不通过域名服务器 |
+| p | 显示正在使用Socket的程序识别码和程序名称 |
 | r | 显示Routing Table |
 | t | 显示TCP传输协议的连线状况 |
 | u |显示UDP传输协议的连线状况 |
@@ -588,7 +588,7 @@ netstat -tunlp|grep 22 // 查看22端口情况
 ### ftp - 因特网文件传输程序
 ### wget - 非交互式网络下载器
 ```
-wget http://www.cyub.me 
+wget http://www.cyub.me
 wget http://www.cyub.me -O a.html
 ```
 
@@ -635,6 +635,31 @@ curl --trace-ascii dump.txt www.cyub.me // 显示通信过程
 ### tcpdump
 ```
  tcpdump -i eth0 not port 22
+```
+
+### firewall-cmd - 防火墙管理
+
+**FirewallD** 是 `iptables` 的前端控制器，用于实现持久的网络流量规则。它提供命令行和图形界面
+
+防火墙启动与关闭
+```
+systemctl start firewalld // 启动防火墙
+systemctl enable firewalld // 设置开机启动
+systemctl stop firewalld // 关闭防火墙
+systemctl disable firewalld // 设置不开机启动
+```
+
+`firewall-cmd`用例
+```
+firewall-cmd --zone=public --add-port=80/tcp --permanent // 开放80端口
+firewall-cmd --reload // 重新加载防火墙配置
+firewall-cmd --state  // 查看防火墙状态
+firewall-cmd --get-zones // 列出支持的zone
+firewall-cmd --get-services // 列出支持的服务，在列表中的服务是放行的
+firewall-cmd --query-service ftp // 查看ftp服务是否支持，返回yes或者no
+firewall-cmd --add-service=ftp  // 临时开放ftp服务
+firewall-cmd --add-service=ftp --permanent  // 永久开放ftp服务
+firewall-cmd --remove-service=ftp --permanent  // 永久移除ftp服务
 ```
 
 ### ifconfig
@@ -792,7 +817,7 @@ dm-1              0.00     0.00    0.04    0.20     0.15     0.81     8.03     0
 | :------ | :------ |
 | Device  | 监测设备名称
 | rrqm/s  | 每秒需要读取需求的数量 |
-| wrqm/s  | 每秒需要写入需求的数量 | 
+| wrqm/s  | 每秒需要写入需求的数量 |
 | r/s   |  每秒实际读取需求的数量 |
 | w/s | 每秒实际写入需求的数量 |
 | rsec/s | 每秒读取区段的数量 |
@@ -805,7 +830,30 @@ dm-1              0.00     0.00    0.04    0.20     0.15     0.81     8.03     0
 | svctm | I/O需求完成的平均时间 |
 | %util | 被I/O需求消耗的CPU百分比 |
 
-### systemctl
+### systemctl - 系统服务管理
+
+**systemctl**是系统服务管理命令，它实际上将`service`和`chkconfig`这两个命令组合到一起。
+
+| 任务 | 旧指令 | 新指令 |
+| :------ | :------ | :------ |
+| 使某服务自动启动 |  chkconfig --level 3 httpd on |  systemctl enable httpd.service |
+| 使某服务不自动启动  | chkconfig --level 3 httpd off |  systemctl disable httpd.service |
+| 检查服务状态  | service httpd status  |  systemctl status httpd.service 服务详细信息<br/> systemctl is-active httpd.service 仅显示是否Active |
+| 显示所有已启动的服务  | chkconfig --list  |  systemctl list-units --type=service |
+| 启动某服务  | service httpd start | systemctl start httpd.service |
+| 停止某服务  | service httpd stop | systemctl stop httpd.service |
+| 重启某服务  | service httpd restart  | systemctl restart httpd.service |
+
+```
+systemctl start nfs-server.service // 启动nfs服务
+systemctl enable nfs-server.service // 设置开机自启动
+systemctl disable nfs-server.service // 停止开机自启动
+systemctl status nfs-server.service // 查看服务当前状态
+systemctl restart nfs-server.service // 重新启动某服务
+systemctl list -units --type=service // 查看所有已启动的服务
+systemctl list-dependencies nfs-server // 列出服务的依赖
+```
+
 
 ### lsof
 
@@ -834,7 +882,7 @@ strace命令是一个集诊断、调试、统计与一体的工具
 | :------ | :------ |
 | -p | 指定跟踪进程的pid |
 | -c | 统计每一系统调用的所执行的时间,次数和出错的次数等 |
-| -f | 跟踪由fork调用所产生的子进程 |  
+| -f | 跟踪由fork调用所产生的子进程 |
 | -ff | 如果提供-o filename,则所有进程的跟踪结果输出到相应的filename.pid中,pid是各进程的进程号 |
 | -t | 在输出中的每一行前加上时间信息. -tt 在输出中的每一行前加上时间信息,微秒级 |
 | -T | 显示每一调用所耗的时间，每个调用的时间花销现在在调用行最右边的尖括号里面 |
@@ -842,11 +890,11 @@ strace命令是一个集诊断、调试、统计与一体的工具
 | -e | 指定一个表达式,用来控制如何跟踪。格式：[qualifier=][!]value1[,value2]... qualifier只能是trace,abbrev,verbose,raw,signal,read,write其中之一.value是用来限定的符号或数字.默认的 qualifier是 trace.感叹号是否定符号.例如:-eopen等价于 -e trace=open,表示只跟踪open调用.而-etrace!=open 表示跟踪除了open以外的其他调用.有两个特殊的符号 all 和 none. 注意有些shell使用!来执行历史记录里的命令,所以要使用\\. |
 
 -e选项常用正则如下：
-默认的为trace=all. 
-+ -e trace=file 只跟踪有关文件操作的系统调用. 
-+ -e trace=process 只跟踪有关进程控制的系统调用. 
-+ -e trace=network 跟踪与网络有关的所有系统调用. 
-+ -e strace=signal 跟踪所有与系统信号有关的系统调用 
+默认的为trace=all.
++ -e trace=file 只跟踪有关文件操作的系统调用.
++ -e trace=process 只跟踪有关进程控制的系统调用.
++ -e trace=network 跟踪与网络有关的所有系统调用.
++ -e strace=signal 跟踪所有与系统信号有关的系统调用
 + -e trace=ipc 跟踪所有与进程通讯有关的系统调用
 
 ```
@@ -901,3 +949,5 @@ timedatectl set-ntp yes // 设置NTP同步，使用“no”关闭NTP同步，使
 * [搞定Linux Shell文本处理工具，看完这篇集锦就够了](https://zhuanlan.zhihu.com/p/29718871)
 * [Linux命令大全](http://man.linuxde.net/)
 * [Using curl to automate HTTP jobs](https://curl.haxx.se/docs/httpscripting.html)
+* [Systemd 入门教程：命令篇](http://www.ruanyifeng.com/blog/2016/03/systemd-tutorial-commands.html)
+* [CentOS 上的 FirewallD 简明指南](https://linux.cn/article-8098-1-rel.html)
