@@ -41,7 +41,7 @@ rm -rf dir1/ dir2/ // 递归删除dir1,dir2目录，即使目录dir2不存在也
 
 ### ln - 创建链接
 ```
-ln -s source_link target_link // 创建软连接target_link
+ln -sf source_link target_link // 创建软连接target_link
 ```
 
 ### stat - 显示文件的详细信息
@@ -58,9 +58,6 @@ ls -l a.txt // 列出文件的mtime
 ls -lc a.txt // 列出文件的ctime
 ls -lu a.txt // 列出文件的atime
 ```
-
-
-
 
 ## 2. I/O重定向
 标准输入，输出和错误，在shell内部它们为文件描述符0，1和2
@@ -291,7 +288,7 @@ which命令的作用是，在PATH变量指定的路径中，搜索某个系统�
 
 ```
 find ~ | wc -l // 统计家目录文件数
-find ~ -type d | wc -l // 统计家目录目录数量
+find ~ -type d | wc -l // 统计家目录下目录数量
 find ~ -type f | wc -l // 统计家目录下文件数量
 find ~ -type f -name "\*.JPG" -size +1M | wc -l // 查找所有文件名匹配 通配符模式“*.JPG”和文件大小大于1M 的文件
 find ~ -type f -name '*.BAK' -delete // 删除扩展名为“.BAK”（这通常用来指定备份文件） 的文件
@@ -420,6 +417,7 @@ sort -k 1,1 -k 2n -k 3.7n foo.txt
 // 多字段排序，对第一个字段执行字母排序，第二个字段执行数值排序，第三个字段的第七个字符按数值排序
 sort -t ':' -k 7 /etc/passwd | head // passwd文件的分隔符是:, 按照第七个字段分割
 ```
+
 ### uniq - 显示或省略重复行
 uniq 只会删除相邻的重复行，常常配合sort使用，排序后然后处理重复行
 
@@ -456,6 +454,7 @@ cut -d: -f 2 a.txt | cut -c 7-10 // 输出年份
 ```
 diff -Naur file1 file2 // 比较file2与file2
 ```
+
 ### tr - 翻译或删除字符
 ```
 echo "lowercase letters" | tr a-z A-Z // 小写转大写
@@ -494,7 +493,6 @@ tail -f /var/log/messages // 不停得读取最新内容
 vim +10 file1.txt // 打开文件并调到第10行
 vim +/search_term file2.txt // 打开文件并调到第一个匹配的行
 vim -R /etc/passwd // 只读模式打开文件
-
 ```
 
 **替换字符用法**
@@ -552,13 +550,13 @@ ping 命令发送一个特殊的网络数据包，叫做IMCP ECHO_REQUEST，到 
 注意：大多数网络设备（包括 Linux 主机）都可以被配置为忽略这些数据包。通常，这样做是出于网络安全 原因，部分地遮蔽一台主机免受一个潜在攻击者地侵袭。配置防火墙来阻塞IMCP流量也很普遍。
 
 ```
-ping www.cyub.me // 测试cyub.me网站
-ping -c 5 www.cyub.me // 发送5个数据包
+ping www.cyub.vip // 测试cyub.me网站
+ping -c 5 www.cyub.vip // 发送5个数据包
 ```
 ### traceroute - 打印到一台网络主机的路由数据包
  显示从本地到指定主机 要经过的所有路由
  ```
-traceroute www.cyub.me
+traceroute www.cyub.vip
  ```
 
 ### netstat - 网络查看工具
@@ -588,8 +586,8 @@ netstat -tunlp|grep 22 // 查看22端口情况
 ### ftp - 因特网文件传输程序
 ### wget - 非交互式网络下载器
 ```
-wget http://www.cyub.me
-wget http://www.cyub.me -O a.html
+wget http://www.cyub.vip
+wget http://www.cyub.vip -O a.html
 ```
 
 ### ssh - SSH 客户端
@@ -599,40 +597,86 @@ ssh test@baidu.com // 以test用户身份登录baidu.com主机
 
 ### nslookup - 查看dns解析
 ```
-nslookup www.cyub.me
+nslookup www.cyub.vip
 ```
 
 ### dig - 查看dns解析
 ```
-dig www.cyub.me a // 查询域名的A记录，最后的a可省略
-dig www.cyub.me mx // 查询域名的mx记录，其他类型的记录有MX，CNAME，NS，PTR等，默认a记录
-dig @10.255.1.174 www.cyub.me // 指定dns服务器
-dig www.cyub.me a +tcp // dig默认使用udp协议进行查询，+tcp参数则指定tcp方式查询
-dig www.cyub.me a +trace // +trace参数将显示从根域逐级查询的过程
+dig www.cyub.vip a // 查询域名的A记录，最后的a可省略
+dig www.cyub.vip mx // 查询域名的mx记录，其他类型的记录有MX，CNAME，NS，PTR等，默认a记录
+dig @10.255.1.174 www.cyub.vip // 指定dns服务器
+dig www.cyub.vip a +tcp // dig默认使用udp协议进行查询，+tcp参数则指定tcp方式查询
+dig www.cyub.vip a +trace // +trace参数将显示从根域逐级查询的过程
 ```
 
 ### curl - 传输数据工具
-```
-curl www.cyub.me // 查看网页内容
-curl -s -o cyub.me.txt www.cyub.me // 保存网页内容, -s表示silent，不会显示下载进度
-curl -O --progress -C www.cyub.me/file.zip // 下载文件，本地文件名称与远程服务器文件名称一样。--progress显示进度条,-C继续断点下载
-curl --head(I) www.cyub.me // 查看网页响应头
-curl --data(d) "birthyear=1905&press=%20OK%20" www.cyub.me // 以Content-Type=application/x-www-form-urlencoded形式
+```js
+curl www.cyub.vip // 查看网页内容
+curl -s -o cyub.me.txt www.cyub.vip // 保存网页内容, -s表示silent，不会显示下载进度
+curl -O --progress -C www.cyub.vip/file.zip // 下载文件，本地文件名称与远程服务器文件名称一样。--progress显示进度条,-C继续断点下载
+curl --head(I) www.cyub.vip // 查看网页响应头
+curl --data(d) "birthyear=1905&press=%20OK%20" www.cyub.vip // 以Content-Type=application/x-www-form-urlencoded形式
 // POST数据，此时的数据需要urlencode处理好
-curl --data-urlencode "name=I am Daniel" www.cyub.me // 跟上一条命令类似，但数据不用预先编码处理
-curl --form upload=@localfilename --form press=OK www.cyub.me // 文件上传，Content-Type是multipart/form-data
-curl --proxy proxy.cyub.me:4321 www.cyub.me/ // 设置代理
-curl --user name:password www.cyub.me // Basic Authentication
-curl --cookie "name=tinker" www.cyub.me // cookie
-curl --dump-header headers_and_cookies www.cyub.me
-curl --header(H) "Content-Type: text/xml"  --request www.cyub.me
-curl --request(X) POST www.cyub.me // 指定请求方法
-curl -v www.cyub.me // 显示通信过程
-curl --trace output.txt www.cyub.me // 显示通信过程，内容比上一条命令详细
-curl --trace-ascii dump.txt www.cyub.me // 显示通信过程
+curl --data-urlencode "name=I am Daniel" www.cyub.vip // 跟上一条命令类似，但数据不用预先编码处理
+curl --form upload=@localfilename --form press=OK www.cyub.vip // 文件上传，Content-Type是multipart/form-data
+curl --proxy proxy.cyub.me:4321 www.cyub.vip/ // 设置代理
+curl --user name:password www.cyub.vip // Basic Authentication
+curl --cookie "name=tinker" www.cyub.vip // cookie
+curl --dump-header headers_and_cookies www.cyub.vip
+curl --header(H) "Content-Type: text/xml"  --request www.cyub.vip
+curl --request(X) POST www.cyub.vip // 指定请求方法
+curl -v www.cyub.vip // 显示通信过程
+curl --trace output.txt www.cyub.vip // 显示通信过程，内容比上一条命令详细
+curl --trace-ascii dump.txt www.cyub.vip // 显示通信过程
 ```
 
-### tcpdump
+curl还可以通过设置-w选项的时间变量来查看具体传输请求时间，常用变量如下：
+
+| 选项 | 说明 |
+| :------ | :------ |
+| content_type | 请求文件的Content-Type|
+| http_code | 响应状态码 |
+| http_version | http版本 |
+| local_ip | local ip |
+| local_port | local port|
+| redirect_url |  当请求没有指定-L, --location来保存重定向时候， 此变量显示重定向url |
+| remote_ip | remote IP |
+| remote_port | remote port |
+| scheme | URL scheme|
+| size_download | 请求文件的大小(单位byte) |
+| size_header | 响应头的大小(单位byte) |
+| speed_download | 平均下载速度(单位byte/s) |
+| time_appconnect | SSL/SSH 3次握手完成时间(单位s) |
+| time_connect | 与远程服务器建立连接完成时间(单位s) |
+| time_namelookup  | 从请求开始到DNS解析完毕所用时间(单位s) |
+| time_starttransfer | 最初的网络请求被发起到从服务器接收到第一个字节前所花费时间，即TTFB(单位s) |
+| time_total | 完成请求总共时间（单位s) |
+
+**注意:** 某些变量高版本curl才支持, 具体参见[curl man page](https://curl.haxx.se/docs/manpage.html)
+
+用法如下：
+```
+curl -o /dev/null -s -w %{http_code}:%{remote_ip}:%{time_total} http://www.cyub.vip
+// 把变量写入curl-format.txt文件里面
+curl -o /dev/null -s -w "@curl-format.txt" http://www.cyub.vip
+```
+
+```
+// curl-format.txt
+     response_code: %{http_code} %{content_type}\n
+     client_server: %{local_ip}:%{local_port} => %{remote_ip}:%{remote_port}\n
+    dns_resolution: %{time_namelookup}s\n
+   tcp_established: %{time_connect}s\n
+ssl_handshake_done: %{time_appconnect}s\n
+              TTFB: %{time_starttransfer}s\n
+        time_total: %{time_total}s\n
+     size_download: %{size_download}bytes\n
+    speed_download: %{speed_download}byte/s\n
+```
+
+
+
+### tcpdump - 网络流量监测工具
 ```
  tcpdump -i eth0 not port 22
 ```
