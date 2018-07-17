@@ -630,7 +630,7 @@ curl --trace output.txt www.cyub.vip // 显示通信过程，内容比上一条�
 curl --trace-ascii dump.txt www.cyub.vip // 显示通信过程
 ```
 
-curl还可以通过设置-w选项的时间变量来查看具体传输请求时间，常用变量如下：
+curl还可以通过设置-w选项的时间变量来查看具体传输请求时间，常用变量如下：
 
 | 选项 | 说明 |
 | :------ | :------ |
@@ -643,11 +643,11 @@ curl还可以通过设置-w选项的时间变量来查看具体传输请求时�
 | remote_ip | remote IP |
 | remote_port | remote port |
 | scheme | URL scheme|
-| size_download | 请求文件的大小(单位byte) |
+| size_download | 请求文件的大小(单位byte) |
 | size_header | 响应头的大小(单位byte) |
 | speed_download | 平均下载速度(单位byte/s) |
 | time_appconnect | SSL/SSH 3次握手完成时间(单位s) |
-| time_connect | 与远程服务器建立连接完成时间(单位s) |
+| time_connect | 与远程服务器建立连接完成时间(单位s) |
 | time_namelookup  | 从请求开始到DNS解析完毕所用时间(单位s) |
 | time_starttransfer | 最初的网络请求被发起到从服务器接收到第一个字节前所花费时间，即TTFB(单位s) |
 | time_total | 完成请求总共时间（单位s) |
