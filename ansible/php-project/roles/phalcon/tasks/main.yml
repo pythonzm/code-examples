@@ -1,0 +1,22 @@
+---
+- name: Clone phalcon repository
+  git:
+    repo: https://github.com/phalcon/cphalcon
+    dest: "{{ phalcon_source_src_dir }}"
+    version: "{{ phalcon_source_version }}"
+
+- name: Install Phalcon
+  shell: >
+    ./install --php-config /usr/local/bin/php-config --phpize /usr/local/bin/phpize
+    chdir={{ phalcon_source_src_dir }}/build
+
+- name: Add Phalcon extension to php.ini
+  lineinfile:
+    path: "{{ php_conf_path }}/php.ini"
+    line: extension=phalcon
+
+- name: Add Phalcon extension to php-cli.ini
+  lineinfile:
+    path: "{{ php_conf_path }}/php-cli.ini"
+    line: extension=phalcon
+

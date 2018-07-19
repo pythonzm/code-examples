@@ -1,0 +1,91 @@
+---
+
+# PHP-FPM configuration.
+php_fpm_pool_user: "www-data"
+php_fpm_pool_group: "www-data"
+php_fpm_listen: "127.0.0.1:9000"
+php_fpm_listen_allowed_clients: "127.0.0.1"
+php_fpm_pm_max_children: 50
+php_fpm_pm_start_servers: 5
+php_fpm_pm_min_spare_servers: 5
+php_fpm_pm_max_spare_servers: 5
+
+# The executable to run when calling PHP from the command line.
+php_executable: "php"
+
+# PHP configuration.
+php_expose_php: "Off"
+php_memory_limit: "256M"
+php_max_execution_time: "30"
+php_max_input_time: "60"
+php_max_input_vars: "1000"
+php_realpath_cache_size: "4096K"
+
+php_file_uploads: "On"
+php_upload_max_filesize: "64M"
+php_max_file_uploads: "20"
+
+php_post_max_size: "8M"
+php_date_timezone: "Asia/Shanghai"
+php_allow_url_fopen: "On"
+
+php_output_buffering: "4096"
+php_short_open_tag: "On"
+php_disable_functions: []
+
+php_error_reporting: "E_ALL & ~E_DEPRECATED & ~E_STRICT"
+php_display_errors: "Off"
+php_display_startup_errors: "Off"
+
+
+# Install PHP from source (instead of using a package manager) with these vars.
+php_source_version: "7.2.8"
+php_source_mirror: "http://cn2.php.net/get/php-{{ php_source_version }}.tar.gz/from/this/mirror"
+php_source_src_dir: "~/src/php-{{ php_source_version }}"
+php_source_install_path: "/usr/local/php/{{ php_source_version }}"
+
+
+php_conf_path: "{{ php_source_install_path }}/lib"
+php_fpm_conf_path: "{{ php_source_install_path }}/etc"
+php_source_make_command: "make"
+php_source_configure_command: >
+  ./configure
+  --prefix={{ php_source_install_path }}
+  --enable-fpm
+  --enable-mbstring
+  --enable-sockets
+  --enable-mysqlnd
+  --enable-zip
+  --enable-intl
+  --enable-bcmath
+  --enable-pcntl
+  --enable-ftp
+  --enable-exif
+  --enable-opcache
+  --enable-pdo
+  --with-libdir=lib/x86_64-linux-gnu
+  --with-curl
+  --with-mcrypt
+  --with-iconv
+  --with-gmp
+  --with-pspell
+  --with-gd
+  --with-jpeg-dir=/usr
+  --with-png-dir=/usr
+  --with-zlib-dir=/usr
+  --with-xpm-dir=/usr
+  --with-freetype-dir=/usr
+  --enable-gd-native-ttf
+  --enable-gd-jis-conv
+  --with-openssl
+  --with-pdo-mysql=/usr
+  --with-gettext=/usr
+  --with-zlib=/usr
+  --with-bz2=/usr
+  --with-recode=/usr
+  --with-fpm-user=www-data
+  --with-fpm-group=www-data
+
+# Phalcon extension
+phalcon_source_version: "v3.4.0"
+phalcon_source_src_dir: "~/src/phalcon-{{ phalcon_source_version }}"
