@@ -1123,6 +1123,22 @@ timedatectl set-ntp yes // 设置NTP同步，使用“no”关闭NTP同步，使
 
 ### date
 
+### 快捷键
+
+快捷键 | 说明
+------ | -----
+ctrl + u | 删除从开头到光标处的命令文本
+ctrl + k | 删除从光标到结尾处的命令文本
+ctrl + a | 光标移动到命令开头
+ctrl + e | 光标移动到命令结尾
+ctrl + w | 删除一个词（以空格隔开的字符串）
+ctrl + c | 中断程序执行(产生SIGINT信号)
+ctrl + \ | 退出程序执行(产生SIGQUIT信号)
+ctrl + d | 默认的文件结束符
+ctrl + insert | 复制
+shift + insert | 黏贴
+ctrl + s | 冻结屏幕
+ctrl + q | 退出冻结屏幕
 
 ## 11. 相关资源
 * [The Linux Command Line 中文版](https://www.kancloud.cn/thinkphp/linux-command-line)
