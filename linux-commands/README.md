@@ -103,8 +103,9 @@ yum list installed | grep "软件名或者包名"
 ## 4. 权限与进程
 ### id – 显示用户身份号
 ```
-id
-uid=500(me) gid=500(me) groups=500(me)
+id // 显示当前用户uid, gid, groups
+id -u // 显示当前用户uid
+id -g // 显示当前用户gid
 ```
 
 ### chmod - 改变文件模式
@@ -146,6 +147,7 @@ chown tinker a.txt // 将a.txt文件所有者改为tinker,文件用户组不变
 chown tinker:tony a.txt // 将a.txt文件所有者改为tinker,文件用户组改为tony
 chown :tony a.txt //将a.txt文件的用户组改为tony,所有者不变
 chown tinker: a.txt // 将a.txt文件所有者改成tinker，用户组改为tinker登录系统时候，所属的用户组
+chown -aG sudo tinker // 将用户加入sudo用户组
 ```
 
 ### password - 更改用户密码
@@ -158,7 +160,7 @@ passwd tinker // 修改tinker账户密码
 
 ```
 ps aux // 查看当前允许进程
-ps -ef | more // 查看当前运行的所有进程
+ps -ef | more // 查看当前运行的所有进程（包含进程的父进程信息)
 ps -A --sort=-rss -o comm,pmem,pcpu | uniq -c |head -15 // 按进程内存占用大小，从大到小来排序。RSS表示实际分配的内存大小
 ps -eo comm,pmem,pcpu --sort=-%cpu  | head -10 // 按进程消耗cpu资源大小，从小大到大排序。--sort=-%cpu表示使用从大到小。-e和-A是一样的。
 ps -c nginx --no-header | wc -l // 统计nginx进程数量。--no-header表示不答应头部
@@ -295,7 +297,7 @@ kill -9 12345 // 终止进程12345
 kill -l // 查看信号列表
 ```
 
-按下ctrl+c组合键时产生SIGINT信号（中断信号), ctrl+\产生SIGQUIT信号(退出信号),ctrl+d是默认的文件结束符
+按下ctrl+c组合键时产生SIGINT信号（中断信号), ctrl+\产生SIGQUIT信号(退出信号)，ctrl+d是默认的文件结束符
 
 ### killall - 给多个进程发送信号
 
@@ -367,10 +369,27 @@ find . -mtime 7 -type f // 搜索最近7天修改过的文件。
 ```
 
 ### grep - 根据文件内容查找文件
+
+grep选项：
+
+| 选项 | 说明 |
+| :------ | :------ |
+| -A | 输出当前匹配内容的后面几行内容 |
+| -B | 输入出当前匹配内容的前面几行内容 |
+| -C | 输出当前匹配内容的前后几行内容 |
+| -r | 递归查找当前目录下的文件的匹配行 |
+| -i | 不区分大小的查找当前文件内容 |
+| -v | 查找不匹配内容的行 |
+| --color | 是否高亮显示匹配的内容，auto-自动，alawys-每次，可以通过环境变量GREP_OPTIONS配置 |
+
 ```
 grep -i "hello" hello.php // 在hello.php里面不区分大小写的查找hello
 grep -A 3 -i "hello" // 输出成功匹配的行，以及该行之后的三行，-B选项之前
 grep -r "hello" dir1/ // 递归查找dir1目录下文件的匹配行
+grep --color=always hello hello.php | more // 此时通过more管道时候也会高亮显示
+grep --color=always abc file.txt | less -R // 此时通过less管道是也会高亮显示
+grep -v php file.txt // 查找不包含php的行
+grep -v -e php -e golang file.txt // 查找不包含php和golang的行
 ```
 
 ## 6. 归档与备份
@@ -383,11 +402,11 @@ grep -r "hello" dir1/ // 递归查找dir1目录下文件的匹配行
 
 | 选项 | 说明 |
 | :------ | :------ |
-| -c   | 把输出写入到标准输出，并且保留原始文件。也有可能用--stdout 和--to-stdout 选项来指定|
-| -d   | 解压缩。正如 gunzip 命令一样。也可以用--decompress 或者--uncompress 选项来指定|
-| -r   | 若命令的一个或多个参数是目录，则递归地压缩目录中的文件。也可用--recursive 选项来指定|
-| -t   | 测试压缩文件的完整性。也可用--test 选项来指定|
-| -v   | 显示压缩过程中的信息。也可用--verbose 选项来指定|
+| -c | 把输出写入到标准输出，并且保留原始文件。也有可能用--stdout 和--to-stdout 选项来指定|
+| -d | 解压缩。正如 gunzip 命令一样。也可以用--decompress 或者--uncompress 选项来指定|
+| -r | 若命令的一个或多个参数是目录，则递归地压缩目录中的文件。也可用--recursive 选项来指定|
+| -t | 测试压缩文件的完整性。也可用--test 选项来指定 |
+| -v | 显示压缩过程中的信息。也可用--verbose 选项来指定 |
 
 
 ```
@@ -410,10 +429,10 @@ gunzip -c foo.txt | less // 不必指定gz拓展名，默认就是
 
 | 操作模式 | 说明 |
 | :------ | :------ |
-| c | 为文件和／或目录列表创建归档文件 |
-| x | 抽取归档文件 |
-| r | 追加具体的路径到归档文件的末尾 |
-| t | 列出归档文件的内容 |
+| -c | 为文件和／或目录列表创建归档文件 |
+| -x | 抽取归档文件 |
+| -r | 追加具体的路径到归档文件的末尾 |
+| -t | 列出归档文件的内容 |
 
 ```
 tar -cvf /path/to/foo.tar /path/to/foo/ // 创建一个包
@@ -519,6 +538,7 @@ echo "lowercase letters" | tr [:lower:] [:upper:] // 小写转大写
 ```
 
 ### sed - 文本的流编辑器
+
 ```
 echo "front" | sed 's/front/back/' // 输出back
 sed -n "/string/p" logFile // 打印包含string的行
@@ -1036,6 +1056,9 @@ lsof -c php-fpm7 // 查看进程打开的文件，参数是进程名称
 lsof -u vagrant // 查看用户打开的文件
 lsof -i:80 // 查看哪个进程监听80端口
 lsof -i4 // 列出ipv4相关信息
+lsof -d 1 // 列出占用文件描述符1的进程
+lsof -d /tmp // 列出/tmp目录下被打开的文件
+lsof -D /tmp // 递归列出/tmp目录下被打开的文件
 ```
 
 ### free
