@@ -66,7 +66,7 @@ ls -l dir1/ >> ls-output.txt // 重定向ls命令输出的内容到ls-output.txt
 ls -l /usr/bintmp 2>ls-error.txt // 重定向标准错误输出到ls-error.txt
 ls -l /bin/usr > ls-output.txt 2>&1 // 重定向标准输出和错误到同一个文件
 ls -l /usr /usr/bintmp 2>ls-error.txt 1>ls-output.txt // 错误重定向到ls-error.txt 输出重定向到ls-output.txt
-ls /usr/bin | tee ls.txt | grep zip //tee 从stdin读取数据，并同时输出到stdout和文件。tee命令相当于管道的一个T型接头
+ls /usr/bin | tee -a ls.txt | grep zip //tee 从stdin读取数据，并同时输出到stdout和文件。tee命令相当于管道的一个T型接头, -a表示追加
 nginx -c nginx.conf > /dev/null 2>&1// 屏蔽标准和错误输出
 ```
 
@@ -165,6 +165,7 @@ ps -A --sort=-rss -o comm,pmem,pcpu | uniq -c |head -15 // 按进程内存占用
 ps -eo comm,pmem,pcpu --sort=-%cpu  | head -10 // 按进程消耗cpu资源大小，从小大到大排序。--sort=-%cpu表示使用从大到小。-e和-A是一样的。
 ps -c nginx --no-header | wc -l // 统计nginx进程数量。--no-header表示不答应头部
 ps -axjf // 打印进程树
+ps -p 1924 -o lstart // 查看进程ID等于1924的进程创建时间
 ```
 
 ![ps](https://static.cyub.vip/images/201904/ps.jpg)
@@ -545,6 +546,7 @@ sed -n "/string/p" logFile // 打印包含string的行
 sed -n '5,10p' /etc/passwd  // 查看文件5到10行
 sed -n '3,5{=;p}' logFile // 打印3到5行，并且打印行号
 sed '/^$/d' file // 删除空行
+sed -i "s/原字符串/新字符串/g" `grep 原字符串 -rl 所在目录` // 替换目录下字符串
 
 ```
 ### awk - 文本分析工具
