@@ -547,7 +547,7 @@ sed -n '5,10p' /etc/passwd  // 查看文件5到10行
 sed -n '3,5{=;p}' logFile // 打印3到5行，并且打印行号
 sed '/^$/d' file // 删除空行
 sed -i "s/原字符串/新字符串/g" `grep 原字符串 -rl 所在目录` // 替换目录下字符串
-
+sed -n '/script_filename =/{n;p}'  www.log.slow // 获取匹配行的下一行内容
 ```
 ### awk - 文本分析工具
 awk是超强大的文本分析工具。不仅仅是linux系统中的一个命令，而且是一种编程语言
@@ -570,7 +570,9 @@ awk -F '[][]' '{print $3}' file // []作为分隔符
 awk '$9 > 500 {print $0}' access.log | wc -l  // 统计nginx访问日志里面状态码大于等于500的行数
 awk -F\" '$2 ~ "^GET /api" {print $0}' access.log // 打印nginx访问日志里面请求方法为GET，url已/api开头的记录
 awk '{if(NR>=10 && NR<=20) print $0}' access.log // 打印10到20行
+awk '/script_filename =/{getline a;print a;}'  www.log.slow // 获取匹配行的下一行内容。getline是读取下一行内容并复制给变量a，接着打印出来。其中变量a可以省略
 ```
+
 ### head - 显示开头文字行
 ```
 head -n 5 a.txt // 显示头5行文字
