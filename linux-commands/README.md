@@ -1,20 +1,24 @@
 # Linux常用命令大全
 
 ## 1. 文件与目录操作
+
 ### touch - 创建文件
 
 若文件不存在则创建文件，若存在则修改文件的时间(存取时间和更改时间)
+
 ```
 touch a.txt // 创建a.txt
 touch -r a.txt b.txt // 设置a.txt,b.txt时间一致
 ```
 ### mv - 移动/重命名文件和目录
+
 ```
 mv a.txt b.txt // 重命名a.txt为b.txt
 mv a.txt dir1/  // 将a.txt 移动到dir1目录下
 ```
 
 ### mkdir - 创建目录
+
 ```
 mkdir dir1 // 创建目录dir1
 mkdir dir1 dir2 dir3 // 创建目录dir1,dir2,dir3
@@ -22,6 +26,7 @@ mkdir -p a/b/ //若父目录不存在则先创建父目录
 ```
 
 ### cp - 复制文件和目录
+
 ```
 cp a.txt b.txt // 复制a.txt到b.txt，如果b.txt不存在，则创建，存在则覆盖
 cp -i a.txt b.txt // 如果b.txt存在，覆盖b.txt之前，会询问用户
@@ -32,6 +37,7 @@ cp -u a.txt b.txt // 当b.txt不存在，或者a.txt新于b.txt时候才会复�
 ```
 
 ### rm - 删除文件和目录
+
 ```
 rm file1 // 删除file1
 rm -i file1 // 删除文件file1，询问用户确认
@@ -40,6 +46,7 @@ rm -rf dir1/ dir2/ // 递归删除dir1,dir2目录，即使目录dir2不存在也
 ```
 
 ### ln - 创建链接
+
 ```
 ln -sf source_link target_link // 创建软连接target_link
 ```
@@ -60,6 +67,7 @@ ls -lu a.txt // 列出文件的atime
 ```
 
 ## 2. I/O重定向
+
 标准输入，输出和错误，在shell内部它们为文件描述符0，1和2
 ```
 ls -l dir1/ >> ls-output.txt // 重定向ls命令输出的内容到ls-output.txt文件,>等同于1>
@@ -71,6 +79,7 @@ nginx -c nginx.conf > /dev/null 2>&1// 屏蔽标准和错误输出
 ```
 
 ## 3. 包管理
+
 不同的 Linux 发行版使用不同的打包系统。一般而言，大多数发行版分别属于两大包管理技术阵营： Debian 的”.deb”，和红帽的”.rpm”。也有一些重要的例外，比方说 Gentoo， Slackware，和 Foresight，但大多数会使用这两个基本系统中的一个。
 
 软件包管理系统通常由两种工具类型组成：**底层工具用来处理这些任务，比方说安装和删除软件包文件**， 和**上层工具完成元数据搜索和依赖解析**。
@@ -101,7 +110,9 @@ yum list installed | grep "软件名或者包名"
 ```
 
 ## 4. 权限与进程
+
 ### id – 显示用户身份号
+
 ```
 id // 显示当前用户uid, gid, groups
 id -u // 显示当前用户uid
@@ -127,7 +138,9 @@ chmod u+x,go=rw a.txt //给文件拥有者执行权限并给组和其他人读�
 ```
 
 ### umask - 设置默认权限
+
 ### su - 切换用户
+
 ```
 su // 切换成root用户，默认root用户
 su - // 切换成root用户，并切换环境
@@ -135,6 +148,7 @@ su - tinker // 切换成tinker，并切换环境
 ```
 
 ### sudo - 使用其他身份执行命令
+
 ```
 sudo su - // 切换到root用户
 sudo nginx -s reload // 以root用户身份执行nginx配置重载
@@ -142,6 +156,7 @@ sudo -u www-data top // 已指定用户身份(www-data)执行top命令
 ```
 
 ### chown - 更改文件所有者和用户组
+
 ```
 chown tinker a.txt // 将a.txt文件所有者改为tinker,文件用户组不变
 chown tinker:tony a.txt // 将a.txt文件所有者改为tinker,文件用户组改为tony
@@ -151,6 +166,7 @@ chown -aG sudo tinker // 将用户加入sudo用户组
 ```
 
 ### password - 更改用户密码
+
 ```
 passwd // 修改当前登录用户密码
 passwd tinker // 修改tinker账户密码
@@ -166,6 +182,8 @@ ps -eo comm,pmem,pcpu --sort=-%cpu  | head -10 // 按进程消耗cpu资源大小
 ps -c nginx --no-header | wc -l // 统计nginx进程数量。--no-header表示不答应头部
 ps -axjf // 打印进程树
 ps -p 1924 -o lstart // 查看进程ID等于1924的进程创建时间
+ps -eLf | grep java | wc -l // 查看java线程数
+ps -T -p pid // 查看进程号为pid的进程创建的所有线程
 ```
 
 ![ps](https://static.cyub.vip/images/201904/ps.jpg)
@@ -212,44 +230,130 @@ STAT值有：
 
 
 ### top - 动态查看进程
+
 top命令是常用的性能分析工具，能够实时显示系统中各个进程的资源占用状况
 
 ```
 top // 查看进程，默认以CPU占有率排序
-top u tinker // 查看特定用户tinker的进程
-top c // 显示完整命令
 ```
+
+**常见选项列表：**
+
+选项 | 说明
+--- | ---
+-u user | 查看特定用户user的进程
+-c | 显示完整命令
+-H | 以线程模式执行 top，等同于交互式命令 H。默认情况下以进程模式执行 top，进程模式下，一个进程下的所有线程归总后显示一行
+-i | 不显示任何闲置（idle）或无用（zombie）的进程
+-p pid | 只显示指定进程 ID 的进程信息。可以指定多个 PID，最多为 20 个，格式为 -p PID1,PID2,PID3...。特别地，pid 为 0 表示 top 命令本身。如果想显示所有进程信息，无需关闭 top 命令，只需要执行交互式命令 =、u 或 U 即可。
+
+
 ![top](https://static.cyub.vip/images/201904/top.jpg)
 
-top命令输出的第一行后面的三个值是系统在1分钟、5分钟、15分钟内平均负载。**系统平均负载被定义为在特定时间间隔内运行队列中的平均进程数**。
+**上图说明：**
 
-对于系统负载，我们可以类比成高速公路上跑汽车情况。单核CPU服务器，满负载情况，也就是车几乎挨着车，但不堵塞，秩序正常，此时的负载值是1。如果多核CPU情况，满负载值就会是 n * 1，其中n为cpu核数。
+第一行：时间相关和任务队列信息
+
+- 05:18:41 当前时间
+- up 5 days, 14:23 运行时间，分钟
+- 1 user 当前等于用户数
+- load average: 0.03, 0.01, 0.00 当前系统负载，跟uptime命令一样，说明如下：
+
+    三个值是系统在1分钟、5分钟、15分钟内平均负载。**系统平均负载被定义为在特定时间间隔内运行队列中的平均进程数**。
+
+    对于系统负载，我们可以类比成高速公路上跑汽车情况。单核CPU服务器，满负载情况，也就是车几乎挨着车，但不堵塞，秩序正常，此时的负载值是1。如果多核CPU情况，满负载值就会是 n * 1，其中n为cpu核数。
+
+第二行：进程信息统计数据
+
+- 138 total 总的进程数
+- 2 running 正在运行的进程数
+- 136 sleeping 休眠的进程数
+- 0 stopped 停止的进程数
+- 0 zombie 僵尸进程数
 
 
-top命名输出的第二列%Cpu栏目：
-1. %id:空闲CPU时间百分比，如果这个值过低，表明系统CPU存在瓶颈
-2. %wa:等待I/O的CPU时间百分比，如果这个值过高，表明IO存在瓶颈
+第三行：CPU统计数据
 
-交换模式下：
+- 0.0 us 用户空间占用CPU百分比
+- 0.8 sy 内核空间占用CPU百分比
+- 0.0 ni 用户进程空间内改变过优先级的进程占用CPU百分比
+- 99.2 id 空闲CPU时间百分比，如果这个值过低，表明系统CPU存在瓶颈
+- 0.0 wa 等待I/O的CPU时间百分比，如果这个值过高，表明IO存在瓶颈
+- 0.0 hi 硬中断（Hardware IRQ）占用CPU百分比
+- 0.0 si 软中断（Software IRQ）占用CPU百分比
+- 0.0 st 虚拟机（虚拟化技术）占用百分比
 
-输入值 | 结果
+第四行：物理内存的统计数据
+
+- 1016076 total 物理内存总量
+- 146564 free 空闲内存总量
+- 482980 used 已使用的物理内存总量
+- 386532 buff/cache 用作内核缓存的内存量
+
+    注意：free 内存表示尚未被内核占用的空闲内存，但是被内核占用用于 buffer 和 cache 的内存，实际上是可以被进程使用的，内核并不把这些可被重新使用的内存算到 free 中，因此在 Linux 上 free 内存会越来越少，但不用为此担心
+
+第五行： 交换分区（即虚拟内存）的统计数据
+
+- 1048572 total 交换区总量
+- 509624 free 空闲交换区总量
+- 538948 used 已使用的交换区总量
+- 332548 avail Mem 实际可用物理内存总量
+
+第六行为空行
+
+前面五行称为汇总区（Summary Area）。从第7行开始，显示各个进程的状态信息，称为任务区(Task Area)，各列含义如下：
+
+列名 | 说明
+--- | ---
+PID | 进程id
+USER | 进程所有者
+PR | 进程优先级，范围为0-31，数值越低，优先级越高
+NI | nice值。范围-20到+19，用于调整进程优先级，新的进程优先级 PR(new)=PR(old)+nice，所以nice负值表示高优先级，正值表示低优先级
+VIRT | 进程使用的虚拟内存总量，单位 KB
+RES | Resident Memory Size，进程使用的、未被换出的物理内存大小，单位 KB
+SHR | 共享内存大小，单位 KB
+S | 进程状态。D=不可中断的睡眠状态 R=运行 S=睡眠 T=停止 t=跟踪 Z=僵尸进程
+%CPU | 上次更新到现在的 CPU 时间占用百分比。注意，在多核或多 CPU 环境中，如果进程是多线程的，而 top 不是在线程模式下运行的，该值由多个核的值累加，可能会大于 100%
+%MEM | 进程使用的物理内存百分比
+TIME+ | 进程使用的 CPU 时间总计，单位 1/100 秒
+COMMAND | 进程名称（命令名/命令行）
+
+
+**交换模式下命令**
+
+命令 | 结果
 ---- | -----
-M | 进程列表按内存使用大小降序排序
-P | 进程列表按CPU使用大小降序排序
+<b>P</b> | 进程列表按CPU使用大小降序排序
+<b>M</b> | 进程列表按内存使用大小降序排序
 T | 进程列表按照累计时间大小降序排列
-b | 进入高亮模式，高亮显示正在运行的进程
-x | 高亮排序列，top命名默认使用cpu列表排序的
-shift + > | 选择排序列，反方向使用shift + <
+N | 进程列表按照PID排序
+b | 进入高亮模式，行和列的背景高亮
+<b>x</b> | 高亮被选中排序的列，top命名默认使用cpu列表排序的，默认cpu列会高亮
+<b>y</b> | 高亮显示正在运行的任务，即某一行进程
+> | 右移选择排序列
+< | 左移选择排序列
 k | 终止一个进程。默认的终止的信号是15
-o | 根据列来过滤进程，比如COMMAND=nginx，表示显示COMMAND是nginx的进程。%CPU>3表示cpu负载大于3进程。按下等号(=)会清除掉过滤条件
-u | 显示指定用户的进程
-L | 定位输入的字符位置
+o | 根据列来过滤进程。 按下等号(=)会清除掉过滤条件
+E | 扩增（Extend）汇总区内存显示单位，从 KB、MB、GB、TB、PB 到 EB 循环切换
+<b>e</b> | 扩增（Extend）任务区内存显示单位，从 KB、MB、GB、TB、PB 到 EB 循环切换
+H | 以线程（tHread）模式展示任务区，每个线程单独显示一行。默认是进程模式
+<b>u</b> | 显示指定用户的进程
 c | 显示命令的绝对路径
 q | 退出top交换模式
 R | 反转排序
-m | 切换显示内存显示方式
+m | 切换显示内存显示方式，以内存条占比形式显示
+k | 杀死（Kill）指定进程，默认信号为15（SIGTERM）
+1 | 显示或隐藏每个 CPU 核心的使用信息，即影响第三行 CPU 信息显示方式
+<b>L</b> | 在进程列表中搜索字符串
+= | 显示所有进程信息。可用打破-p选项，交互命令o只显示部分进程，恢复默认进程列表
+f | 进入字段管理窗口管理显示的字段，前面带星号的字段是默认显示的
 
 
+交互命令o或O的筛选器格式：
+
+> <字段名><运算符><选择值>
+
+运算符可以是=、<、>。具体示例比如COMMAND=nginx，表示筛选COMMAND是nginx的进程。%CPU>3表示cpu负载大于3进程。%CPU>0.0筛选cpu负载大于0的进行，注意是0.0，不能是0
 
 ### jobs – 列出任务
 
@@ -320,6 +424,12 @@ pstree
 
 ```
 pgrep nginx // 查看nginx进程id
+```
+
+### pmap
+
+```
+pmap PID // 查看进程内存状况
 ```
 
 
@@ -528,11 +638,13 @@ cut -d: -f 2 a.txt | cut -c 7-10 // 输出年份
 ```
 
 ### diff - 逐行比较文件
+
 ```
 diff -Naur file1 file2 // 比较file2与file2
 ```
 
 ### tr - 翻译或删除字符
+
 ```
 echo "lowercase letters" | tr a-z A-Z // 小写转大写
 echo "lowercase letters" | tr [:lower:] [:upper:] // 小写转大写
@@ -570,22 +682,26 @@ awk -F '[][]' '{print $3}' file // []作为分隔符
 awk '$9 > 500 {print $0}' access.log | wc -l  // 统计nginx访问日志里面状态码大于等于500的行数
 awk -F\" '$2 ~ "^GET /api" {print $0}' access.log // 打印nginx访问日志里面请求方法为GET，url已/api开头的记录
 awk '{if(NR>=10 && NR<=20) print $0}' access.log // 打印10到20行
+awk '/NR>=10, NR<=20/{print $0}' access.log // 打印10到20行。基于范围模式匹配模式
 awk '/script_filename =/{getline a;print a;}'  www.log.slow // 获取匹配行的下一行内容。getline是读取下一行内容并复制给变量a，接着打印出来。其中变量a可以省略
 ```
 
 ### head - 显示开头文字行
+
 ```
 head -n 5 a.txt // 显示头5行文字
 head -n -5 a.txt // 显示排除掉末尾5行的其他文字
 head -c 100 a.txt 显示最开始100个字符
 ```
 ### tail
+
 ```
 tail -n 10 a.txt // 查看文件最后10行
 tail -f /var/log/messages // 不停得读取最新内容
 ```
 
 ### vim
+
 ```
 vim +10 file1.txt // 打开文件并调到第10行
 vim +/search_term file2.txt // 打开文件并调到第一个匹配的行
@@ -611,6 +727,7 @@ vim -R /etc/passwd // 只读模式打开文件
 
 
 ### xargs
+
 ```
 find . -name '*.sh' -maxdepth 1 | xargs -I {} ls '{}' // -I指定替换字符
 ls -al | xargs -n 10 rm // 每10做一个分组
@@ -619,6 +736,7 @@ ls|grep {关键字} |  xargs -n 10 rm -fr
 ```
 
 ### wc - 统计行和字符的工具
+
 ```
 wc -l file // 统计行数
 wc -w file // 统计单词数
@@ -626,6 +744,7 @@ wc -c file // 统计字符数
 ```
 
 ### split - 切割文件
+
 split用于将文件切割成多个小文件
 
 表7.4 split选项
@@ -646,7 +765,9 @@ split -l 10 date.file // 把文件分割成每个包含10行的小文件
 
 
 ## 8. 网络管理
+
 ### ping - 发送 ICMP ECHO_REQUEST 软件包到网络主机
+
 ping 命令发送一个特殊的网络数据包，叫做IMCP ECHO_REQUEST，到 一台指定的主机。大多数接收这个包的网络设备将会回复它，来允许网络连接验证，反应连接速度。
 
 注意：大多数网络设备（包括 Linux 主机）都可以被配置为忽略这些数据包。通常，这样做是出于网络安全 原因，部分地遮蔽一台主机免受一个潜在攻击者地侵袭。配置防火墙来阻塞IMCP流量也很普遍。
@@ -656,6 +777,7 @@ ping www.cyub.vip // 测试cyub.me网站
 ping -c 5 www.cyub.vip // 发送5个数据包
 ```
 ### traceroute - 打印到一台网络主机的路由数据包
+
  显示从本地到指定主机 要经过的所有路由
 
  ```
@@ -688,7 +810,9 @@ netstat -tunlp | grep 22 // 查看22端口情况
 sudo netstat -pnt | grep :80 | wc -l // 粗略估计访问80端口人数
 ```
 ### ftp - 因特网文件传输程序
+
 ### wget - 非交互式网络下载器
+
 ```
 wget http://www.cyub.vip
 wget http://www.cyub.vip -O a.html
@@ -718,6 +842,7 @@ dig www.cyub.vip a +trace // +trace参数将显示从根域逐级查询的过程
 ```
 
 ### curl - 传输数据工具
+
 ```js
 curl www.cyub.vip // 查看网页内容
 curl -s -o cyub.me.txt www.cyub.vip // 保存网页内容, -s表示silent，不会显示下载进度
@@ -785,6 +910,7 @@ ssl_handshake_done: %{time_appconnect}s\n
 
 
 ### tcpdump - 网络流量监测工具
+
 tcpdump默认抓取68个字节。
 
 ```
@@ -826,6 +952,7 @@ firewall-cmd --remove-service=ftp --permanent  // 永久移除ftp服务
 ### scp
 
 ### nc - 网络工具中的瑞士军刀
+
 nc是netcat命令别名
 
 表7.6 nc常见选项
@@ -1119,19 +1246,24 @@ strace -f -tt -o /tmp/php.trace -s1024 -p `pidof php5-fpm | tr ' ' ','` // 同�
 ## 10. 其他
 
 ### ulimit
+
 linux 默认值 open files 和 max user processes 为 1024
+
 ```
 ulimit -n // 最多打开文件数
 ulimit -u // 最多处理用户进程数
 ```
 
 ### uname
+
 ```
 uname -a // 查看系统信息
 ```
 
 ### timedatectl - 查看和设置时间
+
 timedatectl是用来查询和修改系统时间和配置的Linux应用程序。它是systemd 系统服务管理的一部分，并且允许你检查和修改系统时钟的配置。
+
 ```bash
 timedatectl // 查看当前时间和时区
 timedatectl set-time YYYY-MM-DD // 设置日期
@@ -1179,3 +1311,4 @@ ctrl + q | 退出冻结屏幕
 * [CentOS 上的 FirewallD 简明指南](https://linux.cn/article-8098-1-rel.html)
 * [Redhat-system administrator's guide](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/index)
 * [Redhat-performance tuning guide](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/performance_tuning_guide/index)
+* [top 命令](https://cloud.tencent.com/developer/article/1525282)
