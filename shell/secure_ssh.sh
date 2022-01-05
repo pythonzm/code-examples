@@ -9,9 +9,25 @@ for i in `cat  /tmp/ssh_black.list`
 do
   IP=`echo $i |awk -F= '{print $1}'`
   NUM=`echo $i|awk -F= '{print $2}'`
-  if [ ${#NUM} -gt 1 ]; then
+  if [ $NUM -gt 1 ]; then
     grep $IP /etc/hosts.deny > /dev/null
     if [ $? -gt 0 ];then
+      echo "sshd:$IP:deny" >> /etc/hosts.deny
+    fi
+  fi
+done
+
+#######################
+# 对于大部分爆破日志如下，使用下面的脚本内容
+# Nov  8 18:16:09 VM-24-12-centos sshd[11746]: Invalid user admin from 47.25.107.181 port 58147
+grep Invalid /var/log/secure | awk '{print $(NF-2)}' | sort | uniq -c | awk '{print $2"="$1;}' > /tmp/ssh_black.list
+for i in `cat  /tmp/ssh_black.list`
+do
+  IP=`echo $i |awk -F= '{print $1}'`
+  NUM=`echo $i|awk -F= '{print $2}'`
+  if [[ $NUM -gt 5 ]]; then
+    grep $IP /etc/hosts.deny > /dev/null
+    if [[ $? -gt 0 ]];then
       echo "sshd:$IP:deny" >> /etc/hosts.deny
     fi
   fi
