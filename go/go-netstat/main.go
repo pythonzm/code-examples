@@ -198,11 +198,12 @@ func parseRawSocketEntry(entry string) (*socketEntry, error) {
 // hexIP是网络字节序/大端法转换成的16进制的字符串
 func parseHexBigEndianIPStr(hexIP string) net.IP {
 	b := []byte(hexIP)
-	for i, j := 1, len(b)-2; i < j; i, j = i+2, j-2 { // 反转字节，转换成小端法
-		b[i], b[i-1], b[j], b[j+1] = b[j+1], b[j], b[i-1], b[i]
-	}
+	//for i, j := 1, len(b)-2; i < j; i, j = i+2, j-2 { // 反转字节，转换成小端法
+	//	b[i], b[i-1], b[j], b[j+1] = b[j+1], b[j], b[i-1], b[i]
+	//}
 	l, _ := strconv.ParseInt(string(b), 16, 64)
-	return net.IPv4(byte(l>>24), byte(l>>16), byte(l>>8), byte(l))
+	//return net.IPv4(byte(l>>24), byte(l>>16), byte(l>>8), byte(l))
+	return net.IPv4(byte(l), byte(l>>8), byte(l>>16), byte(l>>24))
 }
 
 func init() {
