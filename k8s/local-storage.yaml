@@ -18,7 +18,7 @@ spec:
   accessModes:
   - ReadWriteOnce
   local:  
-    path: /data/loki
+    path: /data/loki  # 这个路径需要提前创建
   nodeAffinity:
     required:
       nodeSelectorTerms:
