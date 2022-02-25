@@ -1,0 +1,10 @@
+[Unit]
+Description=prometheus
+After=network.target
+
+[Service]
+Restart=on-failure
+ExecStart=/usr/local/prometheus/prometheus --web.console.templates=/usr/local/prometheus/consoles --web.console.libraries=/usr/local/prometheus/console_libraries --config.file=/usr/local/prometheus/prometheus.yml --storage.tsdb.path=/data/prometheus --storage.tsdb.retention.time=5h --web.enable-lifecycle --storage.tsdb.no-lockfile --web.route-prefix=/
+
+[Install]
+WantedBy=multi-user.target
