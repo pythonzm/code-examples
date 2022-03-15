@@ -1,0 +1,32 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: nacos-backup
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          nodeSelector:
+            kubernetes.io/hostname: k12-k8s-master-01
+          tolerations:
+          - operator: "Exists"
+          containers:
+          - name: nacos-backup
+            env:
+            - name: TZ
+              value: Asia/Shanghai
+            image: nacos/nacos-mysql:5.7
+            imagePullPolicy: IfNotPresent
+            command: ["/bin/sh"]
+            args: ["-c", "mysqldump -hnacos-mysql.devops.svc.cluster.local -unacos -pnacos nacos_devtest | gzip > /backup/nacos-mysql-$(date +%Y-%m-%d).sql.gz && find /backup -mtime +7 -delete"]
+            volumeMounts:
+            - mountPath: /backup
+              name: nacos-backup
+          restartPolicy: OnFailure
+          volumes:
+          - name: nacos-backup
+            hostPath:
+              path: /data/nacos-backup
+              type: DirectoryOrCreate
