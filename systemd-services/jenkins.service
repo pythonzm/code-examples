@@ -1,0 +1,14 @@
+[Unit]
+Description=Jenkins
+After=network.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/jenkins/jenkins.conf
+ExecStart=/usr/local/java/bin/java $JAVA_ARGS -jar $JENKINS_WAR $JENKINS_ARGS
+WorkingDirectory=/data/jenkins
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
