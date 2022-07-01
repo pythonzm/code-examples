@@ -1,0 +1,148 @@
+## 告警规则
+{
+    "query": {
+        "bool": {
+            "filter": [
+                {
+                    "range": {
+                        "@timestamp": {
+                            "from": "{{period_end}}||-5m",
+                            "to": "{{period_end}}",
+                            "include_lower": true,
+                            "include_upper": true,
+                            "format": "epoch_millis",
+                            "boost": 1
+                        }
+                    }
+                },
+                {
+                    "match_all": {
+                        "boost": 1
+                    }
+                },
+                {
+                    "bool": {
+                        "should": [
+                            {
+                                "match_phrase": {
+                                    "status": {
+                                        "query": "500",
+                                        "slop": 0,
+                                        "zero_terms_query": "NONE",
+                                        "boost": 1
+                                    }
+                                }
+                            },
+                            {
+                                "match_phrase": {
+                                    "status": {
+                                        "query": "502",
+                                        "slop": 0,
+                                        "zero_terms_query": "NONE",
+                                        "boost": 1
+                                    }
+                                }
+                            },
+                            {
+                                "match_phrase": {
+                                    "status": {
+                                        "query": "503",
+                                        "slop": 0,
+                                        "zero_terms_query": "NONE",
+                                        "boost": 1
+                                    }
+                                }
+                            }
+                        ],
+                        "adjust_pure_negative": true,
+                        "minimum_should_match": "1",
+                        "boost": 1
+                    }
+                },
+                {
+                    "match_phrase": {
+                        "http_host.keyword": {
+                            "query": "poorops.com",
+                            "slop": 0,
+                            "zero_terms_query": "NONE",
+                            "boost": 1
+                        }
+                    }
+                },
+                {
+                    "match_phrase": {
+                        "header.keyword": {
+                            "query": "content",
+                            "slop": 0,
+                            "zero_terms_query": "NONE",
+                            "boost": 1
+                        }
+                    }
+                }
+            ],
+            "must_not": [
+                {
+                    "bool": {
+                        "should": [
+                            {
+                                "match_phrase": {
+                                    "url": {
+                                        "query": "/api/statistics",
+                                        "slop": 0,
+                                        "zero_terms_query": "NONE",
+                                        "boost": 1
+                                    }
+                                }
+                            },
+                            {
+                                "match_phrase": {
+                                    "url": {
+                                        "query": "/api/stu-business",
+                                        "slop": 0,
+                                        "zero_terms_query": "NONE",
+                                        "boost": 1
+                                    }
+                                }
+                            },
+                            {
+                                "match_phrase": {
+                                    "url": {
+                                        "query": "/parents",
+                                        "slop": 0,
+                                        "zero_terms_query": "NONE",
+                                        "boost": 1
+                                    }
+                                }
+                            },
+                            {
+                                "match_phrase": {
+                                    "url": {
+                                        "query": "/staging",
+                                        "slop": 0,
+                                        "zero_terms_query": "NONE",
+                                        "boost": 1
+                                    }
+                                }
+                            }
+                        ],
+                        "adjust_pure_negative": true,
+                        "minimum_should_match": "1",
+                        "boost": 1
+                    }
+                }
+            ],
+            "adjust_pure_negative": true,
+            "boost": 1
+        }
+    },
+    "_source": {
+        "includes": [],
+        "excludes": []
+    },
+    "docvalue_fields": [
+        {
+            "field": "@timestamp",
+            "format": "date_time"
+        }
+    ]
+}
