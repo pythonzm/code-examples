@@ -1,8 +1,0 @@
----
-- name: Install PHP-FPM
-  hosts: all
-  remote_user: root
-
-  roles:
-    - php-fpm
-    - phalcon

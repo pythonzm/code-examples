@@ -1,5 +1,0 @@
-#!/usr/bin/stap
-
-probe process("application_path").function("*") {
-  println(probefunc())
-}

@@ -1,6 +1,0 @@
----
-- name: restart php-fpm
-  systemd:
-    name: "{{ php_fpm_daemon }}"
-    state: restarted
-    daemon_reload: yes
