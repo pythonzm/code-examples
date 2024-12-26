@@ -1,4 +1,5 @@
 <settings>
+    <localRepository>/home/morpheus/.m2/repository</localRepository>
     <mirrors>
       <mirror>
         <id>nexus</id>
