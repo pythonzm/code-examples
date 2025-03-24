@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka
+  namespace: middleware
+  labels:
+    app: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      securityContext:
+        runAsUser: 0
+      containers:
+      - name: kafka
+        image: apache/kafka:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: KAFKA_NODE_ID
+          value: "1"
+        - name: KAFKA_NUM_PARTITIONS
+          value: "3"
+        - name: KAFKA_PROCESS_ROLES
+          value: broker,controller
+        - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+          value: "1@localhost:9093"
+        - name: KAFKA_LISTENERS
+          value: "PLAINTEXT://localhost:9092,CONTROLLER://localhost:9093"
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: "PLAINTEXT://localhost:9092"
+        - name: KAFKA_CONTROLLER_LISTENER_NAMES
+          value: CONTROLLER
+        - name: KAFKA_LOG_DIRS
+          value: /tmp/kafka-logs
+        - name: TZ
+          value: Asia/Shanghai
+        ports:
+        - containerPort: 9092
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 1024Mi
+        livenessProbe:
+          failureThreshold: 10
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+          exec:
+            command:
+              - pgrep
+              - -f
+              - kafka
+        readinessProbe:
+          initialDelaySeconds: 10
+          failureThreshold: 10
+          periodSeconds: 10
+          successThreshold: 1
+          exec:
+            command:
+              - pgrep
+              - -f
+              - kafka
+        volumeMounts:
+          - mountPath: /tmp/kafka-logs
+            name: kafka-logs
+            subPath: kafka-logs
+      volumes:
+        - name: kafka-logs
+          persistentVolumeClaim:
+            claimName: kafka-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  namespace: middleware
+spec:
+  ports:
+  - port: 9092
+    targetPort: 9092
+  selector:
+    app: kafka
+
