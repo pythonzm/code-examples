@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: kafka
   namespace: middleware
@@ -22,6 +22,14 @@ spec:
         image: apache/kafka:latest
         imagePullPolicy: IfNotPresent
         env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: KAFKA_NODE_ID
           value: "1"
         - name: KAFKA_NUM_PARTITIONS
@@ -29,20 +37,26 @@ spec:
         - name: KAFKA_PROCESS_ROLES
           value: broker,controller
         - name: KAFKA_CONTROLLER_QUORUM_VOTERS
-          value: "1@localhost:9093"
+          value: "1@$(POD_NAME):9093"
         - name: KAFKA_LISTENERS
-          value: "PLAINTEXT://localhost:9092,CONTROLLER://localhost:9093"
+          value: "INTERNAL://:9092,EXTERNAL://:29092,CONTROLLER://:9093"
         - name: KAFKA_ADVERTISED_LISTENERS
-          value: "PLAINTEXT://localhost:9092"
+          value: "INTERNAL://kafka.middleware.svc:9092,EXTERNAL://101.40.131.171:29092"
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: "CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
         - name: KAFKA_CONTROLLER_LISTENER_NAMES
           value: CONTROLLER
-        - name: KAFKA_LOG_DIRS
-          value: /tmp/kafka-logs
+        - name: KAFKA_INTER_BROKER_LISTENER_NAME
+          value: INTERNAL
         - name: TZ
           value: Asia/Shanghai
         ports:
-        - containerPort: 9092
-          protocol: TCP
+        - name: controller
+          containerPort: 9093
+        - name: internal
+          containerPort: 9092
+        - name: external
+          containerPort: 29092
         resources:
           limits:
             cpu: 1000m
@@ -51,30 +65,27 @@ spec:
             cpu: 100m
             memory: 1024Mi
         livenessProbe:
-          failureThreshold: 10
+          failureThreshold: 3
           initialDelaySeconds: 10
           periodSeconds: 10
           successThreshold: 1
-          timeoutSeconds: 1
+          timeoutSeconds: 5
           exec:
             command:
               - pgrep
               - -f
               - kafka
         readinessProbe:
-          initialDelaySeconds: 10
-          failureThreshold: 10
+          failureThreshold: 6
+          initialDelaySeconds: 5
           periodSeconds: 10
           successThreshold: 1
-          exec:
-            command:
-              - pgrep
-              - -f
-              - kafka
+          timeoutSeconds: 5
+          tcpSocket:
+            port: "controller"
         volumeMounts:
           - mountPath: /tmp/kafka-logs
             name: kafka-logs
-            subPath: kafka-logs
       volumes:
         - name: kafka-logs
           persistentVolumeClaim:
@@ -87,9 +98,21 @@ metadata:
   name: kafka
   namespace: middleware
 spec:
+  type: ClusterIP
+  clusterIP: None
   ports:
-  - port: 9092
-    targetPort: 9092
+  - name: tcp-internal
+    port: 9092
+    protocol: TCP
+    targetPort: internal
+  - name: tcp-external
+    port: 29092
+    protocol: TCP
+    targetPort: external
+  - name: tcp-controller
+    protocol: TCP
+    port: 9093
+    targetPort: controller
   selector:
     app: kafka
 
