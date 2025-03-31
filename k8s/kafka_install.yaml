@@ -6,6 +6,7 @@ metadata:
   labels:
     app: kafka
 spec:
+  serviceName: kafka
   replicas: 1
   selector:
     matchLabels:
@@ -41,7 +42,7 @@ spec:
         - name: KAFKA_LISTENERS
           value: "INTERNAL://:9092,EXTERNAL://:29092,CONTROLLER://:9093"
         - name: KAFKA_ADVERTISED_LISTENERS
-          value: "INTERNAL://kafka.middleware.svc:9092,EXTERNAL://101.42.130.171:29092,CONTROLLER://$(POD_NAME):9093"
+          value: "INTERNAL://kafka-0.kafka.middleware.svc:9092,EXTERNAL://101.42.130.171:29092,CONTROLLER://$(POD_NAME):9093"
         - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
           value: "CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
         - name: KAFKA_CONTROLLER_LISTENER_NAMES

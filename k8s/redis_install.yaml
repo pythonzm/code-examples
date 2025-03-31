@@ -45,13 +45,14 @@ data:
     dir /data
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: redis
   namespace: middleware
   labels:
     app: redis
 spec:
+  serviceName: redis
   replicas: 1
   selector:
     matchLabels:
@@ -117,9 +118,10 @@ metadata:
   name: redis
   namespace: middleware
 spec:
+  type: ClusterIP
+  clusterIP: None
   ports:
   - port: 6379
     targetPort: 6379
   selector:
     app: redis
-
