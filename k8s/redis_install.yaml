@@ -44,6 +44,20 @@ data:
     requirepass pass
     dir /data
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: middleware
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - port: 6379
+    targetPort: 6379
+  selector:
+    app: redis
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -111,17 +125,3 @@ spec:
           persistentVolumeClaim:
             claimName: redis-pvc
 
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: redis
-  namespace: middleware
-spec:
-  type: ClusterIP
-  clusterIP: None
-  ports:
-  - port: 6379
-    targetPort: 6379
-  selector:
-    app: redis

@@ -1,3 +1,28 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  namespace: middleware
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: tcp-internal
+    port: 9092
+    protocol: TCP
+    targetPort: internal
+  - name: tcp-external
+    port: 29092
+    protocol: TCP
+    targetPort: external
+  - name: tcp-controller
+    protocol: TCP
+    port: 9093
+    targetPort: controller
+  selector:
+    app: kafka
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -93,29 +118,4 @@ spec:
         - name: kafka-logs
           persistentVolumeClaim:
             claimName: kafka-pvc
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: kafka
-  namespace: middleware
-spec:
-  type: ClusterIP
-  clusterIP: None
-  ports:
-  - name: tcp-internal
-    port: 9092
-    protocol: TCP
-    targetPort: internal
-  - name: tcp-external
-    port: 29092
-    protocol: TCP
-    targetPort: external
-  - name: tcp-controller
-    protocol: TCP
-    port: 9093
-    targetPort: controller
-  selector:
-    app: kafka
 
