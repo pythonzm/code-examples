@@ -19,7 +19,7 @@ spec:
         runAsUser: 0
       containers:
       - name: jenkins
-        image: jenkins/jenkins:lts
+        image: jenkins/jenkins:2.492.2-lts-jdk17
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ
