@@ -1,0 +1,243 @@
+pipeline {
+    agent {
+        label 'kubectl'
+    }
+
+    parameters {
+        choice choices: ['test', 'main'], name: 'branch'
+    }
+
+    environment {
+        serviceName = "${JOB_BASE_NAME}"
+        servicePort = 8080
+        gitUrl = "http://git.demo.com/demo.git"
+        gitCredentialsId = "36bc2f99-7138-487e-a544-7332a9ce1783"
+        harborCredentials = "l6dc10d9-752b-4176-b392-1a9f75c70400"
+        imageName = "harbor.demo.com/demo/${serviceName}-${branch}:v${BUILD_NUMBER}"
+    }
+    options {
+        skipDefaultCheckout(true)
+    }
+
+    stages {
+        stage('生成变量') {
+            steps {
+                script {
+                    env.namespace = branch == 'main' ? 'demo' : 'demo-test'
+                    env.replicas = branch == 'main' ? 2 : 1
+                    env.active = branch == 'main' ? 'prod' : 'test'
+                }
+            }
+        }
+        stage('拉取代码') {
+            steps {
+                cleanWs()
+                checkout changelog: true, poll: false, scm: scmGit(branches: [[name: "*/${branch}"]], extensions: [], userRemoteConfigs: [[credentialsId: "${gitCredentialsId}", url: "${gitUrl}"]])
+            }
+        }
+        stage('编译代码') {
+            steps {
+                script {
+                    sh "mvn clean package -Dmaven.test.skip=true -U"
+                }
+            }
+        }
+        stage('打包镜像') {
+            steps {
+                script {
+                    def dockerfileContent = """\
+                        FROM harbor.demo.com/common/openjdk:11.0.2
+                        ADD *.jar /app.jar
+                        """
+                    sh "mkdir temp && cp ${serviceName}/target/*.jar temp/"
+                    dir("temp") {
+                        writeFile file: 'Dockerfile', text: dockerfileContent.stripIndent(), encoding: 'UTF-8'
+                        withCredentials([usernamePassword(credentialsId: "${harborCredentials}", passwordVariable: 'password', usernameVariable: 'username')]) {
+                            sh """
+                            docker login -u ${username} --password=${password} harbor.demo.com
+                            docker build -t ${imageName} .
+                            docker push ${imageName}
+                            docker image rm ${imageName}
+                            docker logout harbor.demo.com
+                            """
+                        }        
+                    }
+                }
+            }
+        }
+        stage('Prepare Deployment YAML') {
+            steps {
+                script {
+                    def deployment = [
+                        apiVersion: 'apps/v1',
+                        kind: 'Deployment',
+                        metadata: [
+                            name: env.serviceName,
+                            namespace: env.namespace,
+                            labels: [
+                                app: env.serviceName
+                            ]
+                        ],
+                        spec: [
+                            revisionHistoryLimit: 10,
+                            replicas: env.replicas.toInteger(),
+                            selector: [
+                                matchLabels: [
+                                    app: env.serviceName
+                                ]
+                            ],
+                            template: [
+                                metadata: [
+                                    labels: [
+                                        app: env.serviceName
+                                    ]
+                                ],
+                                spec: [
+                                    imagePullSecrets: [
+                                       [name: 'xdbor'] 
+                                    ],
+                                    containers: [
+                                        [
+                                            name: env.serviceName,
+                                            image: env.imageName,
+                                            imagePullPolicy: 'IfNotPresent',
+                                            env: [
+                                                [
+                                                    name: 'JAVA_OPTS',
+                                                    value: '-XX:InitialRAMPercentage=60.0 -XX:MinRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0'
+                                                ]
+                                            ],
+                                            command: [
+                                                'sh',
+                                                '-c',
+                                                "java \$JAVA_OPTS -jar /app.jar --spring.profiles.active=${active} --server.port=${servicePort}"
+                                            ],
+                                            ports: [
+                                                [
+                                                    containerPort: env.servicePort.toInteger(),
+                                                    name: 'service'
+                                                ]
+                                            ],
+                                            resources: [
+                                                limits: [
+                                                    cpu: '1000m',
+                                                    memory: '2048Mi'
+                                                ],
+                                                requests: [
+                                                    cpu: '100m',
+                                                    memory: '2048Mi'
+                                                ]
+                                            ],
+                                            livenessProbe: [
+                                                failureThreshold: 10,
+                                                initialDelaySeconds: 20,
+                                                periodSeconds: 10,
+                                                successThreshold: 1,
+                                                tcpSocket: [
+                                                    port: env.servicePort.toInteger()
+                                                ],
+                                                timeoutSeconds: 1
+                                            ],
+                                            readinessProbe: [
+                                                tcpSocket: [
+                                                    port: env.servicePort.toInteger()
+                                                ],
+                                                initialDelaySeconds: 20,
+                                                failureThreshold: 10,
+                                                periodSeconds: 10,
+                                                successThreshold: 1
+                                            ],
+                                            lifecycle: [
+                                                preStop: [
+                                                    exec: [
+                                                        command: [
+                                                            'sh',
+                                                            '-c',
+                                                            'sleep 15'
+                                                        ]
+                                                    ]
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+
+                    if (env.branch == 'main') {
+                        def templateSpec = deployment.spec.template.spec
+
+                        templateSpec.nodeSelector = [ env: 'prod' ]
+                        templateSpec.tolerations = [
+                            [
+                                key: 'env',
+                                operator: 'Equal',
+                                value: 'prod',
+                                effect: 'NoSchedule'
+                            ]
+                        ]
+
+                        templateSpec.affinity = [
+                            podAntiAffinity: [
+                                preferredDuringSchedulingIgnoredDuringExecution: [
+                                    [
+                                        weight: 100,
+                                        podAffinityTerm: [
+                                            labelSelector: [
+                                                matchExpressions: [
+                                                    [
+                                                        key: 'app',
+                                                        operator: 'In',
+                                                        values: [env.serviceName]
+                                                    ]
+                                                ]
+                                            ],
+                                            topologyKey: 'topology.kubernetes.io/zone'
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    } else {
+                        echo "Branch is ${branch}. 对于非 main 分支，不需要添加nodeSelector, tolerations, affinity"
+                        // 可以根据需要设置不同的副本数或镜像 tag
+                        // deployment.spec.replicas = 1
+                        // deployment.spec.template.spec.containers[0].image = "harbor.demo.com/demo/${env.APP_NAME}:dev-${env.BUILD_NUMBER}"
+                    }
+
+                    def service = [
+                        apiVersion: 'v1',
+                        kind: 'Service',
+                        metadata: [
+                            name: env.serviceName,
+                            namespace: env.namespace,
+                            labels: [
+                                app: env.serviceName
+                            ]
+                        ],
+                        spec: [
+                            ports: [
+                                [
+                                    port: env.servicePort.toInteger(),
+                                    targetPort: env.servicePort.toInteger(),
+                                    name: "http-${serviceName}"
+                                ]
+                            ],
+                            selector: [
+                                app: env.serviceName
+                            ],
+                            type: 'ClusterIP'
+                        ]
+                    ]
+
+                    def k8sResources = [deployment, service]
+
+                    writeYaml file: 'deploy.yaml', datas: k8sResources, overwrite: true
+
+                    sh "export KUBECONFIG=/root/.kube/config && kubectl apply -f deploy.yaml && kubectl rollout status -n ${namespace} deployment $serviceName} --timeout=120s"
+                }
+            }
+        }
+    }
+}
