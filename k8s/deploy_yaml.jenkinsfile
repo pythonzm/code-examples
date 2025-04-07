@@ -17,6 +17,7 @@ pipeline {
     }
     options {
         skipDefaultCheckout(true)
+        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '30', numToKeepStr: '30')
     }
 
     stages {
@@ -65,7 +66,7 @@ pipeline {
                 }
             }
         }
-        stage('Prepare Deployment YAML') {
+        stage('部署服务') {
             steps {
                 script {
                     def deployment = [
@@ -234,6 +235,8 @@ pipeline {
                     def k8sResources = [deployment, service]
 
                     writeYaml file: 'deploy.yaml', datas: k8sResources, overwrite: true
+
+                    archiveArtifacts artifacts: 'deploy.yaml'
 
                     sh "export KUBECONFIG=/root/.kube/config && kubectl apply -f deploy.yaml && kubectl rollout status -n ${namespace} deployment $serviceName} --timeout=120s"
                 }
