@@ -1,0 +1,70 @@
+loki:
+  auth_enabled: false
+  schemaConfig:
+    configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+  storage_config:
+    aws:
+      region: ap-beijing
+      bucketnames: loki
+      s3forcepathstyle: false
+  pattern_ingester:
+      enabled: true
+  limits_config:
+    reject_old_samples: true
+    reject_old_samples_max_age: 168h
+    max_cache_freshness_per_query: 10m
+    split_queries_by_interval: 15m
+    query_timeout: 300s
+    volume_enabled: true
+    ingestion_rate_mb: 100
+    ingestion_burst_size_mb: 50
+    max_line_size: 0
+  querier:
+    max_concurrent: 4
+
+  storage:
+    type: s3
+    bucketNames:
+        chunks: loki
+        ruler: loki
+        admin: loki
+    s3:
+      # s3 URL can be used to specify the endpoint, access key, secret key, and bucket name this works well for S3 compatible storages or if you are hosting Loki on-premises and want to use S3 as the storage backend. Either use the s3 URL or the individual fields below (AWS endpoint, region, secret).
+      s3: s3://AK:SK@cos.ap-beijing.myqcloud.com/loki
+      # AWS endpoint URL
+      endpoint: cos.ap-beijing.myqcloud.com
+      # AWS region where the S3 bucket is located
+      region: ap-beijing
+      # AWS secret access key
+      secretAccessKey: SK
+      # AWS access key ID
+      accessKeyId: AK
+      # AWS signature version (e.g., v2 or v4)
+      signatureVersion: v4
+      # Forces the path style for S3 (true/false)
+      s3ForcePathStyle: false
+      # Allows insecure (HTTP) connections (true/false)
+      insecure: false
+      # HTTP configuration settings
+      http_config: {}
+
+deploymentMode: SimpleScalable
+
+backend:
+  replicas: 2
+read:
+  replicas: 2
+write:
+  replicas: 2
+
+# Disable minio storage
+minio:
+  enabled: false
+
