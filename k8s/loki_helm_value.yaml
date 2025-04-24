@@ -63,6 +63,8 @@ read:
   replicas: 2
 write:
   replicas: 2
+  persistence:
+    size: 20Gi
 
 # Disable minio storage
 minio:
