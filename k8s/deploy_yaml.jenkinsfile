@@ -234,6 +234,7 @@ pipeline {
 
                     def k8sResources = [deployment, service]
 
+                    // writeYaml 需要安装 Pipeline Utility Steps 插件
                     writeYaml file: 'deploy.yaml', datas: k8sResources, overwrite: true
 
                     archiveArtifacts artifacts: 'deploy.yaml'
