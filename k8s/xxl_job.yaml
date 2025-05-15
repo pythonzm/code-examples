@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xxl-job
+  namespace: middleware
+  labels:
+    app: xxl-job
+spec:
+  revisionHistoryLimit: 10
+  replicas: 1
+  selector:
+    matchLabels:
+      app: xxl-job
+  template:
+    metadata:
+      labels:
+        app: xxl-job
+    spec:
+      nodeSelector:
+        project: middleware
+      tolerations:
+      - key: "project"
+        operator: "Equal"
+        value: "middleware"
+        effect: "NoSchedule"
+      containers:
+        - name: xxl-job
+          image: m.daocloud.io/docker.io/xuxueli/xxl-job-admin:2.4.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: PARAMS
+              value: --spring.datasource.url=jdbc:mysql://127.0.0.1:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai --spring.datasource.username=xxl_job --spring.datasource.password=M5Kl1F3jo^ucYUvTe --xxl.job.accessToken=default_token
+          ports:
+            - containerPort: 8080
+              name: service
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 4096Mi
+            requests:
+              cpu: 100m
+              memory: 1024Mi
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /xxl-job-admin/actuator/health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /xxl-job-admin/actuator/health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - "sleep 10"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: xxl-job
+  namespace: middleware
+  labels:
+    app: xxl-job
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http-xxl-job
+  selector:
+    app: xxl-job
+  type: ClusterIP
+
