@@ -200,6 +200,12 @@ pipeline {
                                 ]
                             ]
                         ]
+                        // 添加新标签
+                        def templateMetadata = deployment.spec.template.metadata
+                        templateMetadata.labels << [
+                            armsPilotAutoEnable: 'on',
+                            armsPilotCreateAppName: arms-k8s-order-center
+                        ]
                     } else {
                         echo "Branch is ${branch}. 对于非 main 分支，不需要添加nodeSelector, tolerations, affinity"
                         // 可以根据需要设置不同的副本数或镜像 tag
