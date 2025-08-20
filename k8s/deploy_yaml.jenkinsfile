@@ -14,6 +14,9 @@ pipeline {
         gitCredentialsId = "36bc2f99-7138-487e-a544-7332a9ce1783"
         harborCredentials = "l6dc10d9-752b-4176-b392-1a9f75c70400"
         imageName = "harbor.demo.com/demo/${serviceName}-${branch}:v${BUILD_NUMBER}"
+        nacosApiBase = 'http://nacos.demo.com/nacos/v1'
+        nacosNameSpaceID = 'public'
+        nacosGroupName = 'DEFAULT_GROUP'
     }
     options {
         skipDefaultCheckout(true)
@@ -48,7 +51,7 @@ pipeline {
                 script {
                     def dockerfileContent = """\
                         FROM harbor.demo.com/common/openjdk:11.0.2
-                        ADD *.jar /app.jar
+                        ADD *.jar /${serviceName}.jar
                         """
                     sh "mkdir temp && cp ${serviceName}/target/*.jar temp/"
                     dir("temp") {
@@ -69,6 +72,11 @@ pipeline {
         stage('部署服务') {
             steps {
                 script {
+                    def prodPreStopCommand = """\
+                        ACCESS_TOKEN=\$(curl -s -X POST "${nacosApiBase}/auth/users/login" --data-urlencode "username=\$NACOS_USER" --data-urlencode "password=\$NACOS_PASS" | grep -o '"accessToken":"[^"]*"' | cut -d'"' -f4)
+                        curl -X DELETE "${nacosApiBase}/ns/instance?serviceName=${serviceName}&ip=\$POD_IP&port=${servicePort}&namespaceId=${nacosNameSpaceID}&groupName=${nacosGroupName}&accessToken=\$ACCESS_TOKEN"
+                        """.stripIndent()
+                    def preStopCommand = branch == 'main' ? prodPreStopCommand : 'sleep 15'
                     def deployment = [
                         apiVersion: 'apps/v1',
                         kind: 'Deployment',
@@ -97,6 +105,7 @@ pipeline {
                                     imagePullSecrets: [
                                        [name: 'xdbor'] 
                                     ],
+                                    terminationGracePeriodSeconds: 30,
                                     containers: [
                                         [
                                             name: env.serviceName,
@@ -106,12 +115,42 @@ pipeline {
                                                 [
                                                     name: 'JAVA_OPTS',
                                                     value: '-XX:InitialRAMPercentage=60.0 -XX:MinRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -XX:MaxMetaspaceSize=256M -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/opt/logs/dumps'
+                                                ],
+                                                [
+                                                    name: 'TZ',
+                                                    value: 'Asia/Shanghai'
+                                                ],
+                                                [
+                                                    name: 'POD_IP',
+                                                    valueFrom: [
+                                                        fieldRef: [
+                                                            fieldPath: 'status.podIP'
+                                                        ]
+                                                    ]
+                                                ],
+                                                [
+                                                    name: 'NACOS_USER',
+                                                    valueFrom: [
+                                                        secretKeyRef: [
+                                                            name: 'nacos-auth',
+                                                            key: 'username'
+                                                        ]
+                                                    ]
+                                                ],
+                                                [
+                                                    name: 'NACOS_PASS',
+                                                    valueFrom: [
+                                                        secretKeyRef: [
+                                                            name: 'nacos-auth',
+                                                            key: 'password'
+                                                        ]
+                                                    ]
                                                 ]
                                             ],
                                             command: [
                                                 'sh',
                                                 '-c',
-                                                "java \$JAVA_OPTS -jar /app.jar --spring.profiles.active=${active} --server.port=${servicePort}"
+                                                "java \$JAVA_OPTS -jar /${serviceName}.jar --spring.profiles.active=${active} --server.port=${servicePort}"
                                             ],
                                             ports: [
                                                 [
@@ -131,22 +170,23 @@ pipeline {
                                             ],
                                             livenessProbe: [
                                                 failureThreshold: 10,
-                                                initialDelaySeconds: 20,
+                                                initialDelaySeconds: 30,
                                                 periodSeconds: 10,
                                                 successThreshold: 1,
                                                 tcpSocket: [
                                                     port: env.servicePort.toInteger()
                                                 ],
-                                                timeoutSeconds: 1
+                                                timeoutSeconds: 3
                                             ],
                                             readinessProbe: [
                                                 tcpSocket: [
                                                     port: env.servicePort.toInteger()
                                                 ],
-                                                initialDelaySeconds: 20,
+                                                initialDelaySeconds: 30,
                                                 failureThreshold: 10,
                                                 periodSeconds: 10,
-                                                successThreshold: 1
+                                                successThreshold: 1,
+                                                timeoutSeconds: 3
                                             ],
                                             lifecycle: [
                                                 preStop: [
@@ -154,7 +194,7 @@ pipeline {
                                                         command: [
                                                             'sh',
                                                             '-c',
-                                                            'sleep 15'
+                                                            preStopCommand
                                                         ]
                                                     ]
                                                 ]
@@ -245,9 +285,10 @@ pipeline {
 
                     archiveArtifacts artifacts: 'deploy.yaml'
 
-                    sh "export KUBECONFIG=/root/.kube/config && kubectl apply -f deploy.yaml && kubectl rollout status -n ${namespace} deployment $serviceName} --timeout=120s"
+                    sh "export KUBECONFIG=/root/.kube/config && kubectl apply -f deploy.yaml && kubectl rollout status -n ${namespace} deployment $serviceName} --timeout=300s"
                 }
             }
         }
     }
 }
+
