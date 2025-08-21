@@ -77,6 +77,45 @@ pipeline {
                         curl -X DELETE "${nacosApiBase}/ns/instance?serviceName=${serviceName}&ip=\$POD_IP&port=${servicePort}&namespaceId=${nacosNameSpaceID}&groupName=${nacosGroupName}&accessToken=\$ACCESS_TOKEN"
                         """.stripIndent()
                     def preStopCommand = branch == 'main' ? prodPreStopCommand : 'sleep 15'
+                    def containerEnv = [
+                        [
+                            name: 'JAVA_OPTS',
+                            value: "-XX:InitialRAMPercentage=60.0 -XX:MinRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/opt/logs/${deployName}-dumps"
+                        ],
+                        [
+                            name: 'TZ',
+                            value: 'Asia/Shanghai'
+                        ],
+                        [
+                            name: 'POD_IP',
+                            valueFrom: [
+                                fieldRef: [
+                                    fieldPath: 'status.podIP'
+                                ]
+                            ]
+                        ]
+                    ]
+                    // 仅 main 分支需要 NACOS 账号密码
+                    if (branch == 'main') {
+                        containerEnv << [
+                            name: 'NACOS_USER',
+                            valueFrom: [
+                                secretKeyRef: [
+                                    name: 'nacos-auth',
+                                    key: 'username'
+                                ]
+                            ]
+                        ]
+                        containerEnv << [
+                            name: 'NACOS_PASS',
+                            valueFrom: [
+                                secretKeyRef: [
+                                    name: 'nacos-auth',
+                                    key: 'password'
+                                ]
+                            ]
+                        ]
+                    }
                     def deployment = [
                         apiVersion: 'apps/v1',
                         kind: 'Deployment',
@@ -111,42 +150,7 @@ pipeline {
                                             name: env.serviceName,
                                             image: env.imageName,
                                             imagePullPolicy: 'IfNotPresent',
-                                            env: [
-                                                [
-                                                    name: 'JAVA_OPTS',
-                                                    value: '-XX:InitialRAMPercentage=60.0 -XX:MinRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -XX:MaxMetaspaceSize=256M -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/opt/logs/dumps'
-                                                ],
-                                                [
-                                                    name: 'TZ',
-                                                    value: 'Asia/Shanghai'
-                                                ],
-                                                [
-                                                    name: 'POD_IP',
-                                                    valueFrom: [
-                                                        fieldRef: [
-                                                            fieldPath: 'status.podIP'
-                                                        ]
-                                                    ]
-                                                ],
-                                                [
-                                                    name: 'NACOS_USER',
-                                                    valueFrom: [
-                                                        secretKeyRef: [
-                                                            name: 'nacos-auth',
-                                                            key: 'username'
-                                                        ]
-                                                    ]
-                                                ],
-                                                [
-                                                    name: 'NACOS_PASS',
-                                                    valueFrom: [
-                                                        secretKeyRef: [
-                                                            name: 'nacos-auth',
-                                                            key: 'password'
-                                                        ]
-                                                    ]
-                                                ]
-                                            ],
+                                            env: containerEnv, 
                                             command: [
                                                 'sh',
                                                 '-c',
