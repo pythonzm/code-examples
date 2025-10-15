@@ -62,6 +62,7 @@ pipeline {
                             docker build -t ${imageName} .
                             docker push ${imageName}
                             docker image rm ${imageName}
+                            docker system prune -f
                             docker logout harbor.demo.com
                             """
                         }        
