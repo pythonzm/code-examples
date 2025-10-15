@@ -13,7 +13,8 @@ pipeline {
         gitUrl = "http://git.demo.com/demo.git"
         gitCredentialsId = "36bc2f99-7138-487e-a544-7332a9ce1783"
         harborCredentials = "l6dc10d9-752b-4176-b392-1a9f75c70400"
-        imageName = "harbor.demo.com/demo/${serviceName}-${branch}:v${BUILD_NUMBER}"
+        harborUrl = "harbor.demo.com"
+        imageName = "${harborUrl}/demo/${serviceName}-${branch}:v${BUILD_NUMBER}"
         nacosApiBase = 'http://nacos.demo.com/nacos/v1'
         nacosNameSpaceID = 'public'
         nacosGroupName = 'DEFAULT_GROUP'
@@ -50,7 +51,7 @@ pipeline {
             steps {
                 script {
                     def dockerfileContent = """\
-                        FROM harbor.demo.com/common/openjdk:11.0.2
+                        FROM ${harborUrl}/common/openjdk:11.0.2
                         ADD *.jar /${serviceName}.jar
                         """
                     sh "mkdir temp && cp ${serviceName}/target/*.jar temp/"
@@ -58,12 +59,9 @@ pipeline {
                         writeFile file: 'Dockerfile', text: dockerfileContent.stripIndent(), encoding: 'UTF-8'
                         withCredentials([usernamePassword(credentialsId: "${harborCredentials}", passwordVariable: 'password', usernameVariable: 'username')]) {
                             sh """
-                            docker login -u ${username} --password=${password} harbor.demo.com
+                            docker login -u ${username} --password=${password} ${harborUrl}
                             docker build -t ${imageName} .
                             docker push ${imageName}
-                            docker image rm ${imageName}
-                            docker system prune -f
-                            docker logout harbor.demo.com
                             """
                         }        
                     }
@@ -292,6 +290,21 @@ pipeline {
 
                     sh "export KUBECONFIG=/root/.kube/config && kubectl apply -f deploy.yaml && kubectl rollout status -n ${namespace} deployment $serviceName} --timeout=300s"
                 }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                // 清理镜像
+                sh """
+                docker system df
+                docker image rm ${imageName}
+                docker system prune -f
+                docker system df
+                docker logout ${harborUrl}
+                """
             }
         }
     }
