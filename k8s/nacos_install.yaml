@@ -149,3 +149,18 @@ spec:
           value: "identify"
         - name: TZ
           value: Asia/Shanghai
+        # 对应-Xms
+        - name: JVM_XMS
+          value: "4G"
+        # 对应-Xmx
+        - name: JVM_XMX
+          value: "4G"
+        # 对应-Xmn
+        - name: JVM_XMN
+          value: "2G"
+        # 对应-XX:MetaspaceSize
+        - name: JVM_MS
+          value: "512m"
+        # 对应-XX:MaxMetaspaceSize
+        - name: JVM_MMS
+          value: "800m"
